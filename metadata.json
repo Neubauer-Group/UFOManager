@@ -1,0 +1,15 @@
+{
+    "Author": [
+        {"name" : "NAME",
+         "affiliation": "AFFILIATION"},
+        {"name" : "NAME",
+         "affiliation": "AFFILIATION"}
+    ],
+    "Paper_id": {
+        "doi" : "Digital Object Identifier",
+        "arXiv" : "arXiv Identifier",
+        "comment (Don't need to include)": "You can use any identifier, but the form should be maintained so that python can read it as a dictionary."
+    },
+    "Description": "Write your description of your model here."
+}
+

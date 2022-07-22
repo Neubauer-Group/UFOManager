@@ -59,7 +59,7 @@ Then, you can check the new metadata json file in Your_Model_Folder
  --Your_Model.json
 ```
 Before upload your new metadata to Github, you can first check the new metadata.
-Then, a Github person access token is required, the getpass() is also used here for safety. Or You can enter 'No' to exit, upload by youtself later.
+Then, a Github person access token is required, the getpass() is also used here for safety. Or You can enter 'No' to exit, upload by yourself later.
 ```bash
 $ Please enter you Github access token: Your Github personal access token or No
 ```

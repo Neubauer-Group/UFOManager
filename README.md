@@ -63,4 +63,4 @@ Then, a Github person access token is required, the getpass() is also used here 
 ```bash
 $ Please enter you Github access token: Your Github personal access token or No
 ```
-After that, the [repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
+After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.

@@ -26,4 +26,4 @@ For compressed folder, tarball and zip are accepted with UFO model python script
    --object_library.py
     ...
 ```
-For metadata.json, basic information is required. You can see the requirements in example.json.
+For metadata.json, basic information is required. You can see the requirements in [example](https://github.com/ThanosWang/UFOModel_Upload_Download/blob/main/metadata.json)

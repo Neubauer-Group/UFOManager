@@ -3,15 +3,15 @@
 This repository contains two python scripts for uploading/downloading UFO models. 
 
 # Upload
-You can use Upload.py to check validation of your UFO model, upload your UFO model to Zenodo, and get a metadata json file of your UFO model.
+The Upload.py can be executed in both Python2/3. You can use Upload.py to check validation of your UFO model, upload your UFO model to Zenodo, and get a metadata json file of your UFO model.
 ## Preparation
 ```bash
 $ pip install requests, PyGithub
 ```
 ## Usage
-The Upload.py can be executed in both Python2/3. To use Upload.py, you need to put it in the same path with Your_Model_Folder.
+To use Upload.py, you need to put it in the same path with Your_Model_Folder.
 ```
---Some_path
+--Path
  --Upload.py
  --Your_Model_Folder
 ```
@@ -65,3 +65,45 @@ Then, a Github person access token is required, the getpass() is also used here 
 $ Please enter you Github access token: Your Github personal access token or No
 ```
 After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
+
+# Download
+The Download.py is developed only for python 3.You can use Download.py to search for UFO models and download them from Zenodo.
+## Preparation
+The Download.py utilizes [zenodo_get](https://github.com/dvolgyes/zenodo_get) from David Völgyes, detailed citation information is included in the python script.
+```bash
+pip install requests, PyGithub, zenodo_get
+```
+## Usage
+To use Download.py, just put it anywhere you want and execute it.
+```bash
+$ python3 Download.py
+```
+Then, your Github personal access token will be require to access [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation). The input uses getpass() to ensure the safety.
+
+After that, you will be able to search for UFO models you need. Currently, the Download.py supports search on four types of information through UFO model metadata files: corresponding paper id of the model, Model's Zenodo DOI, pdg codes or names of particles in the model.
+```bash
+$ Please choose your keyword type: Paper_id, Model Doi, pdg code, or name
+```
+Then, you can can start your search. For Paper_id and Model Doi, one input value is allowed. But you can input multiple particles' names/pdg codes, separated them with ','.
+```bash
+$ Please enter your needed pdg code: code1, code2, ...
+$ Please enter your needed particle name: name1, name2, ...
+```
+Then, you will get the feedback about which metadata files contains information you input. Also, you can restart the search.
+```bash
+$ Do you still want to search for models? Please type in Yes or No. Yes or No
+```
+After you finishing all your search, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. Or you can type 'No' to exit.
+```
+$ You can choose the metadata you want to download, or type No to exsit: meta1.json, meta2.json, ...
+```
+Then, you will be asked to create a folder, and all UFO models you need will be downloaded to that folder.
+```bash
+$ Please name your download folder: Your_Download_Folder
+```
+And the folder is under the same path where you put the Download.py.
+```
+--Path
+ --Download.py
+ --Your_Download_Folder
+```

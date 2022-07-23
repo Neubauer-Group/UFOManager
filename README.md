@@ -46,8 +46,12 @@ During the upload, your need to name your model/give title of your upload. Other
 ```bash
 $ Please name your model: Your model name or title
 ```
-If everything goes well, you can see a new upload published in your Zenodo account.
+If everything goes well, you can see a new upload draft in your Zenodo account.
 
+Then, you can choose whether to publish the draft. Entering Yes to publish it directly, or if you want to add more information, entering No to skip the publish step.
+```
+Do you want to publish your model? Yes or No? Yes, or No
+```
 After that, a new metadata json file for your model will be created. To ensure the version control, your model version will be required.
 ```bash
 Please enter your model version: Your model version
@@ -60,7 +64,7 @@ Then, you can check the new metadata json file in Your_Model_Folder
  --Your_Model.json
 ```
 Before upload your new metadata to Github, you can first check the new metadata.
-Then, a Github person access token is required, the getpass() is also used here for safety. Or You can enter 'No' to exit, upload by yourself later.
+Then, a Github person access token is required, the getpass() is also used here for safety. Or You can enter No to exit, upload by yourself later.
 ```bash
 $ Please enter you Github access token: Your Github personal access token or No
 ```
@@ -93,7 +97,7 @@ Then, you will get the feedback about which metadata files contains information 
 ```bash
 $ Do you still want to search for models? Please type in Yes or No. Yes or No
 ```
-After you finishing all your search, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. Or you can type 'No' to exit.
+After you finishing all your search, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. Or you can type No to exit.
 ```
 $ You can choose the metadata you want to download, or type No to exsit: meta1.json, meta2.json, ...
 ```

@@ -43,7 +43,7 @@ $ Please enter your Zenodo access token: Your Zenodo Personal Access Token
 ```
 During the upload, your need to name your model/give title of your upload. Other neccessary information will be directly from your metadata.json.
 ```bash
-$ Please name your model: Your model name/title
+$ Please name your model: Your model name or title
 ```
 If everything goes well, you can see a new upload published in your Zenodo account.
 

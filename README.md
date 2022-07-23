@@ -27,7 +27,8 @@ For compressed folder, tarball and zip are accepted with UFO model python script
     ...
 ```
 For metadata.json, basic information is required. You can see the requirements in [example](https://github.com/ThanosWang/UFOModel_Upload_Download/blob/main/metadata.json)
-You can start the python script in the terminal
+
+After everything being set up, you can start the python script in the terminal
 ```bash
 $ python2 or python3 Upload.py
 ```

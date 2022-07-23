@@ -9,7 +9,7 @@ The Upload.py can be executed in both Python2/3. You can use Upload.py to check 
 $ pip install requests, PyGithub
 ```
 ## Usage
-To use Upload.py, you need to put it in the same path with Your_Model_Folder.
+To use the Upload.py, you need to put it in the same path with Your_Model_Folder.
 ```
 --Path
  --Upload.py

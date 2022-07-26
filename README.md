@@ -30,7 +30,7 @@ After everything being set up, you can start the python script in the terminal
 ```bash
 $ python2 or python3 Upload.py
 ```
-And path of Your_Model_Folder, start from your current working directory, will be required
+Then, path of Your_Model_Folder, start from your current working directory, will be required
 ```
 --Your current working directory
  --A

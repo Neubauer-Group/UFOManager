@@ -13,13 +13,7 @@ Or in python2, use
 $ python -m pip install requests, PyGithub
 ```
 ## Usage
-To use the Upload.py, you need to put it in the same path with Your_Model_Folder.
-```
---Path
- --Upload.py
- --Your_Model_Folder
-```
-And inside Your_Model_Folder, a compressed folder and a json file called metadata.json are required.
+To use the Upload part, you need to create Your_Model_Folder with a compressed folder storaging all your model files and a json file called metadata.json.
 
 For compressed folder, tarball and zip are accepted with UFO model python scripts directly inside the folder.
 ```
@@ -36,9 +30,9 @@ After everything being set up, you can start the python script in the terminal
 ```bash
 $ python2 or python3 Upload.py
 ```
-And your folder name will be required
+And full path of Your_Model_Folder will be required
 ```bash
-$ Please enter your whole folder contain both your compressed model file and metadata.json: Your_Model_Folder
+$ Please enter the path of your folder: path\to\Your_Model_Folder
 ```
 Then, your model will be checked whether it can be imported as a complete python package. Your model independent files will also be checked.
 

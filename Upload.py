@@ -337,11 +337,17 @@ with open(path, 'rb') as fp:
 # Add metadata for model
 modelname = raw_input('Please name your model:')
 
+Author_Full_Information = [i for i in file['Author']]
+Author_Information = []
+for i in Author_Full_Information:
+    Author_Information.append({"name": i['name'],
+                               "affiliation": i['affiliation']})
+
 data = { 'metadata' : {
           'title': modelname,
           'upload_type': 'dataset',
           'description': file['Description'],
-          'creators': file['Author']          
+          'creators': Author_Information          
      }
 }
 
@@ -357,8 +363,13 @@ publish_command = raw_input("Do you want to publish your model? Yes or No?")
 if publish_command == 'Yes':
     r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                       params={'access_token': Zenodo_Access_Token} )
+    print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
 
-print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
+if publish_command == 'No':
+    print('You can check your upload draft in your account.')
+    print("Please continue remaining process of Upload after publishing your model.Otherwise, your pull request may fail.")
+
+
 
 # Create new metadata
 modelversion = raw_input('Please enter your model version:')

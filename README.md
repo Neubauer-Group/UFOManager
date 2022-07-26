@@ -5,10 +5,11 @@ This repository contains two python scripts for uploading/downloading UFO models
 # Upload
 The Upload.py can be executed in both Python2/3. You can use Upload.py to check validation of your UFO model, upload your UFO model to Zenodo, and get a metadata json file of your UFO model.
 ## Preparation
+In python3, use
 ```bash
 $ pip install requests, PyGithub
 ```
-Or in python2, use
+In python2, use
 ```
 $ python -m pip install requests, PyGithub
 ```

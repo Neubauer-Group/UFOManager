@@ -1,4 +1,4 @@
-# UFOModel_Upload_Download
+# UFOManager
 
 This repository contains two python scripts for uploading/downloading UFO models. 
 

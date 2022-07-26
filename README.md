@@ -103,7 +103,7 @@ Then, you will be asked to create a folder, and all UFO models you need will be 
 ```bash
 $ Please name your download folder: Your_Download_Folder
 ```
-And the folder is under the same path where you put the Download.py.
+And the folder is under your current working path.
 ```
 --Path
  --Download.py

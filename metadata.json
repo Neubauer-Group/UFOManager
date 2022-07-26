@@ -1,9 +1,11 @@
 {
     "Author": [
         {"name" : "NAME",
-         "affiliation": "AFFILIATION"},
+         "affiliation": "AFFILIATION",
+         "contact": "contact email address"},
         {"name" : "NAME",
-         "affiliation": "AFFILIATION"}
+         "affiliation": "AFFILIATION",
+         "contact": "contact email address"}
     ],
     "Paper_id": {
         "doi" : "Digital Object Identifier",

@@ -30,9 +30,17 @@ After everything being set up, you can start the python script in the terminal
 ```bash
 $ python2 or python3 Upload.py
 ```
-And full path of Your_Model_Folder will be required
+And path of Your_Model_Folder, start from your current working directory, will be required
+```
+--Your current working directory
+ --A
+  --B
+   ...
+    --Your_Model_Folder
+```
+
 ```bash
-$ Please enter the path of your folder: path\to\Your_Model_Folder
+$ Please enter the path of your folder, starting from your current working directory:: A/B/.../Your_Model_Folder
 ```
 Then, your model will be checked whether it can be imported as a complete python package. Your model independent files will also be checked.
 

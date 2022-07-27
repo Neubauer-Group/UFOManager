@@ -424,7 +424,7 @@ if Github_Access_Token == 'No':
 g = Github(Github_Access_Token)
 
 # Get the Public Repository
-repo = g.get_repo('ThanosWang/UFOModel_Metadata_Preservation')
+repo = g.get_repo('ThanosWang/UFOMetadata')
 
 github_user = g.get_user()
 

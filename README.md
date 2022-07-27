@@ -15,19 +15,44 @@ For detailed information of FAIR principles, you can visit [GO FAIR](https://www
 Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. Therefore, we hope to develop FAIR criteria for preservation of UFO models. This repository works as a bridge between UFO model developers and users. In this repository, two python scripts, Upload.py and Downlaod.py, are developed for uploading and downloading UFO models.
 
 # Upload
-Developers can use Upload.py to publish their models. Provided by model files and necessary model inforamtion, the Upload.py will examine the validation of model files, publish the model to Zenodo, generate a metadata json file for the model, and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata)
+Developers can use Upload.py to publish their models. Provided by model files and necessary model inforamtion, the Upload.py will examine the validation of model files, publish the model to Zenodo, generate a metadata json file for the model, and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) for preservation.
 ## Preparation
-The Upload.py can be executed in both Python2/3.
-In python3, use
+You need to do a series of preparation work before being able to use the Upload.py
+### Environment Build
+The Upload.py is suitable in both Python2/3 environment. A Python virtual environment is recommended for executing the Upload.py in command line interface. And necessary Python packages are needed.
+
+With Python3 as your python path, you can use
 ```bash
-$ pip install requests, PyGithub
+$ python3 -m venv Your_virtual_envirenment_name
 ```
-In python2, use
+to create a Python3 virtual environment directly in your working environment;then, use
+```bash
+$ . Your_virtual_envirenment_name/bin/activate
 ```
-$ python -m pip install requests, PyGithub
+to activate your envirenment.
+After that, install neccessary packages,
+```bash
+(Your_virtual_envirenment_name)$ pip install requests, PyGithub
 ```
-## Usage
-To use the Upload part, you need to create Your_Model_Folder with a compressed folder storaging all your model files and a json file called metadata.json.
+With python 2.7 as you python path, you need to install the virtualenv first,
+```bash
+$ python -m pip install virtualenv
+```
+or with python 3 as your python path, use
+```bash
+$ python3 -m pip install virtualenv
+```
+Then, construct the virtual environment and activate the environment in a similar way,
+```bash
+$ virtualenv --python=python2.7 Your_virtual_envirenment_name
+$ . Your_virtual_envirenment_name/bin/activate
+```
+After that, install necessary packages in the same way,
+```
+(Your_virtual_envirenment_name)$ python -m pip install requests, PyGithub
+```
+### File Preparation
+To use the Upload.py, you need to create Your_Model_Folder with a compressed folder storaging all your model files and a json file called metadata.json.
 
 For compressed folder, tarball and zip are accepted with UFO model python scripts directly inside the folder.
 ```
@@ -39,24 +64,25 @@ For compressed folder, tarball and zip are accepted with UFO model python script
     ...
 ```
 For metadata.json, basic information is required. You can see the requirements in [example](https://github.com/ThanosWang/UFOModel_Upload_Download/blob/main/metadata.json)
-
+And you need to make sure that Your_Model_Folder lies in subpath of your current working folder.
+```
+--Your current working directory
+ --FolderA
+  --FolderB
+   ...
+    --Your_Model_Folder
+ --Your_virtual_envirenment_name
+```
+## Usage
 After everything being set up, you can start the python script in the terminal
 ```bash
 $ python2 or python3 Upload.py
 ```
 Then, path of Your_Model_Folder, start from your current working directory, will be required
-```
---Your current working directory
- --A
-  --B
-   ...
-    --Your_Model_Folder
-```
-
 ```bash
-$ Please enter the path of your folder, starting from your current working directory:: A/B/.../Your_Model_Folder
+$ Please enter the path of your folder, starting from your current working directory:: FolderA/FolderB/.../Your_Model_Folder
 ```
-Then, your model will be checked whether it can be imported as a complete python package. Your model independent files will also be checked.
+(Note for current process)
 
 After that, your Zenodo personal access token will be required for uploading your model to Zenodo. The input uses getpass() to ensure the safety.
 ```bash

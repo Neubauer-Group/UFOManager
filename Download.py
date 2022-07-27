@@ -29,7 +29,7 @@ Github_Access_Token = getpass('Please enter you Github access token:')
 
 g = Github(Github_Access_Token)
 
-repo = g.get_repo("ThanosWang/UFOModel_Metadata_Preservation")
+repo = g.get_repo("ThanosWang/UFOMetadata")
 
 Allmetadata = repo.get_contents('Metadata')
 
@@ -51,7 +51,7 @@ def preparation():
     # Download all metadata files from GitHub Repository
     for i in Allmetadata:
         name = i.name
-        url = 'https://raw.githubusercontent.com/ThanosWang/UFOModel_Metadata_Preservation/main/Metadata/'
+        url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
         url += name
         metadata = requests.get(url)
         open(name,'wb').write(metadata.content)

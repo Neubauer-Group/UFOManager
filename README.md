@@ -126,7 +126,7 @@ $ Please enter you Github access token: Your Github personal access token or No
 ```
 After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
 
-A auto check will run when pull request is made. This check may last for 3 minutes to make sure that model's DOI page is avaliable. If any problems happens, please contact thanoswang@163.com.
+A auto check will run when pull request is made. This check may last for 3 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact thanoswang@163.com.
 
 # Download
 Users can use Download.py to search for UFO models through their metadata preserved in [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) and download them from Zenodo.

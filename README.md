@@ -1,10 +1,23 @@
-# UFOManager
 
-This repository contains two python scripts for uploading/downloading UFO models. 
+# About UFO models
+UFO is the abbreviation of Universal FeynRule Output. UFO models are used to store detailed information of Beyond the Standard Model theory, such as information of particles, parameters, and vertices associated with Feynman Diagram and Feynman rules, and then can be used by Monte Carlo event generators such as [MadGraph](http://madgraph.phys.ucl.ac.be) to simulate collider physics in the context of the BSM theories. 
+
+Unlike other models, which store BSM physics information in a collection of text files, requiring further parsing and interpretation before they can be used by every different event generator, UFO models store different information of the particle model, in a generator-independent way, into different PYTHON files. Such a storage method allows event generators working directly with UFO models without any modification or further interfacing. 
+
+For detailed information and format of UFO models, you can read through the article [UFO – The Universal FeynRules Output](https://www.sciencedirect.com/science/article/abs/pii/S0010465512000379#!). Also, you can see exisiting UFO models in [wiki:NLOModels](https://feynrules.irmp.ucl.ac.be/wiki/NLOModels).
+
+# About FAIR principles
+FAIR stands for findable, accessible, interoperable, and reusable. FAIR principles provide guidelines to search, obtain, and use digital objects/data from internet database. The guidelines focus on improving the ability of machines to automatically search and use data and aims to help users better access and reuse those existing data.
+
+For detailed information of FAIR principles, you can visit [GO FAIR](https://www.go-fair.org/fair-principles).
+
+# About this repository
+Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. Therefore, we hope to develop FAIR criteria for preservation of UFO models. This repository works as a bridge between UFO model developers and users. In this repository, two python scripts, Upload.py and Downlaod.py, are developed for uploading and downloading UFO models.
 
 # Upload
-The Upload.py can be executed in both Python2/3. You can use Upload.py to check validation of your UFO model, upload your UFO model to Zenodo, and get a metadata json file of your UFO model.
+Developers can use Upload.py to publish their models. Provided by model files and necessary model inforamtion, the Upload.py will examine the validation of model files, publish the model to Zenodo, generate a metadata json file for the model, and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata)
 ## Preparation
+The Upload.py can be executed in both Python2/3.
 In python3, use
 ```bash
 $ pip install requests, PyGithub

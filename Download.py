@@ -29,7 +29,7 @@ Github_Access_Token = getpass('Please enter you Github access token:')
 
 g = Github(Github_Access_Token)
 
-repo = g.get_repo("ThanosWang/UFOMetadata")
+repo = g.get_repo("ThanosWang/UFOModel_Metadata_Preservation")
 
 Allmetadata = repo.get_contents('Metadata')
 
@@ -51,7 +51,7 @@ def preparation():
     # Download all metadata files from GitHub Repository
     for i in Allmetadata:
         name = i.name
-        url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
+        url = 'https://raw.githubusercontent.com/ThanosWang/UFOModel_Metadata_Preservation/main/Metadata/'
         url += name
         metadata = requests.get(url)
         open(name,'wb').write(metadata.content)
@@ -74,7 +74,7 @@ while True:
         if Flag == 0:
             preparation()
         for file in os.listdir('.'):
-            with open(file) as metadata:
+            with open(file,encoding='utf-8') as metadata:
                 metadatafile = json.load(metadata)
             paper_ids = [metadatafile['Paper_id'][i] for i in metadatafile['Paper_id']]
             if paper_id in paper_ids:
@@ -86,7 +86,7 @@ while True:
         if Flag == 0:
             preparation()
         for file in os.listdir('.'):
-            with open(file) as metadata:
+            with open(file,encoding='utf-8') as metadata:
                 metadatafile = json.load(metadata)
             if Model_Doi == metadatafile['Model Doi']:
                 print('The metadata file %s has Model Doi %s you are looking for.' %(file,metadatafile['Model Doi']))
@@ -98,7 +98,7 @@ while True:
         if Flag == 0:
             preparation()
         for file in os.listdir('.'):
-            with open(file) as metadata:
+            with open(file,encoding='utf-8') as metadata:
                 metadatafile = json.load(metadata)
             All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
             pdg_dict = {}
@@ -116,7 +116,7 @@ while True:
             preparation()
         pdg_code_corresponding_list = []
         for file in os.listdir('.'):
-            with open(file) as metadata:
+            with open(file,encoding='utf-8') as metadata:
                 metadatafile = json.load(metadata)
             All_particles_name_list = [i for i in metadatafile['All Particles']]
             particle_compare_result = all(i in All_particles_name_list for i in particle_name_list)
@@ -125,7 +125,7 @@ while True:
                 break
         if pdg_code_corresponding_list != []:
             for file in os.listdir('.'):
-                with open(file) as metadata:
+                with open(file,encoding='utf-8') as metadata:
                     metadatafile = json.load(metadata)
                 All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
                 pdg_dict_from_particles = {}
@@ -141,7 +141,7 @@ while True:
         break
 
 # Start download part
-download_command = input('You can choose the metadata you want to download, or type No to exsit:')
+download_command = input('You can choose the metadata you want to download, or type No to exit:')
 
 if download_command == 'No':
     # Delete temporary folder for metadata files

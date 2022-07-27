@@ -74,62 +74,86 @@ And you need to make sure that Your_Model_Folder lies in subpath of your current
  --Your_virtual_envirenment_name
 ```
 ## Usage
-After everything being set up, you can start the python script in the terminal
+After everything being set up, you can download Upload.py, put it in your current working directory, and start the python script through the command line
 ```bash
 $ python2 or python3 Upload.py
 ```
-Then, path of Your_Model_Folder, start from your current working directory, will be required
+### Validation Check
+First, path of Your_Model_Folder, start from your current working directory, will be required
 ```bash
 $ Please enter the path of your folder, starting from your current working directory:: FolderA/FolderB/.../Your_Model_Folder
 ```
-(Note for current process)
+Then, your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, the Upload.py will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model. Those information will be included in a new metadata file in later steps.
+### Zenodo Upload
+After the validation check, the Upload.py will use [Zenodo API](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
 
-After that, your Zenodo personal access token will be required for uploading your model to Zenodo. The input uses getpass() to ensure the safety.
+Your Zenodo personal access token will be required for uploading your model to Zenodo. The input uses getpass() to ensure the safety.
 ```bash
 $ Please enter your Zenodo access token: Your Zenodo Personal Access Token
 ```
-During the upload, your need to name your model/give title of your upload. Other neccessary information will be directly from your metadata.json.
+During the upload, your need to name your model/give title of your upload. Other neccessary information,creators and description, will be directly from your metadata.json.
 ```bash
-$ Please name your model: Your model name or title
+$ Please name your model: Your model name
 ```
-If everything goes well, you can see a new upload draft in your Zenodo account.
+If everything goes well, you can see a new draft in your Zenodo account.
 
-Then, you can choose whether to publish the draft. Entering Yes to publish it directly, or if you want to add more information, entering No to skip the publish step.
+Then, you can choose whether to publish the draft. Entering Yes to publish it directly, or if you want to add more metadata information, entering No to skip the publish step.
 ```
 Do you want to publish your model? Yes or No? Yes, or No
 ```
-After that, a new metadata json file for your model will be created. To ensure the version control, your model version will be required.
+Note: You need to publish your model before going to next step. Since before being published, your reserved Zenodo DOI will not be registered by the DOI system. This will affect the upload of your metadata file to Github repository.
+### Generate new metadata
+After publishing your model, your model version will be required.
 ```bash
 Please enter your model version: Your model version
 ```
-Then, you can check the new metadata json file in Your_Model_Folder
+For new version of your existing model, you can just re-run the Upload.py to create a new Zenodo upload and get a new Zenodo DOI. Just the model version and your model compressed folder name need to be different from your existing model.
+
+Then, a new metadata file will be created in Your_Model_Folder.  
 ```
 --Your_Model_Folder
  --metadata.json
- --Your_Model.zip/.tgz/.tar.gz
- --Your_Model.json
+ --Your_Model_versionX.zip/.tgz/.tar.gz
+ --Your_Model_versionX.json
 ```
-Before upload your new metadata to Github, you can first check the new metadata.
-Then, a Github person access token is required, the getpass() is also used here for safety. Or You can enter No to exit, upload by yourself later.
-```bash
+You can see an example complete [metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) in the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata).
+### Github Upload
+Before start this step, you can first check your new metadata file. If you want to make some changes, you can enter No to exit, create a pull request to the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) by yourself later.
+
+Otherwise, a Github person access token is required, and the getpass() is used here for safety.
+```
 $ Please enter you Github access token: Your Github personal access token or No
 ```
-After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
+After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
+
+A auto check will run when pull request is made. This check may last for 3 minutes to make sure that model's DOI page is avaliable. If any problems happens, please contact thanoswang@163.com.
 
 # Download
-The Download.py is developed only for python 3.You can use Download.py to search for UFO models and download them from Zenodo.
-## Preparation
+Users can use Download.py to search for UFO models through their metadata preserved in [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) and download them from Zenodo.
+## Environment Build
+The Download.py is developed only for python 3. A Python virtual environment is recommended for executing the Upload.py in command line interface. And necessary Python packages are needed.
+
+With Python3 as your python path, you can use
+```bash
+$ python3 -m venv Your_virtual_envirenment_name
+```
+to create a Python3 virtual environment directly in your working environment;then, use
+```bash
+$ . Your_virtual_envirenment_name/bin/activate
+```
+to activate your envirenment.
+
 The Download.py utilizes [zenodo_get](https://github.com/dvolgyes/zenodo_get) from David Völgyes, detailed citation information is included in the python script.
 ```bash
 pip install requests, PyGithub, zenodo_get
 ```
 ## Usage
-To use Download.py, just put it anywhere you want and execute it.
+To use Download.py, just download it and put it anywhere you want and execute it.
 ```bash
 $ python3 Download.py
 ```
 Then, your Github personal access token will be require to access [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation). The input uses getpass() to ensure the safety.
-
+### UFO Model Search
 After that, you will be able to search for UFO models you need. Currently, the Download.py supports search on four types of information through UFO model metadata files: corresponding paper id of the model, Model's Zenodo DOI, pdg codes or names of particles in the model.
 ```bash
 $ Please choose your keyword type: Paper_id, Model Doi, pdg code, or name
@@ -143,6 +167,7 @@ Then, you will get the feedback about which metadata files contains information 
 ```bash
 $ Do you still want to search for models? Please type in Yes or No. Yes or No
 ```
+### UFO Model Download
 After you finishing all your search, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. Or you can type No to exit.
 ```
 $ You can choose the metadata you want to download, or type No to exsit: meta1.json, meta2.json, ...
@@ -153,7 +178,7 @@ $ Please name your download folder: Your_Download_Folder
 ```
 And the folder is under your current working path.
 ```
---Path
+--Your current working path
  --Download.py
  --Your_Download_Folder
 ```

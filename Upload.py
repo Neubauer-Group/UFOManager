@@ -295,7 +295,7 @@ shutil.rmtree('ModelFolder')
 
 
 # Check uploaded metadata.json
-with open('metadata.json') as metadata:
+with open('metadata.json',encoding='utf-8') as metadata:
     file = json.load(metadata)
 
 assert file['Author']
@@ -424,7 +424,7 @@ if Github_Access_Token == 'No':
 g = Github(Github_Access_Token)
 
 # Get the Public Repository
-repo = g.get_repo('ThanosWang/UFOMetadata')
+repo = g.get_repo('ThanosWang/UFOModel_Metadata_Preservation')
 
 github_user = g.get_user()
 

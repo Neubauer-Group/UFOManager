@@ -103,11 +103,12 @@ Do you want to publish your model? Yes or No? Yes, or No
 ```
 Note: You need to publish your model before going to next step. Since before being published, your reserved Zenodo DOI will not be registered by the DOI system. This will affect the upload of your metadata file to Github repository.
 ### Generate new metadata
+#### Version issue
 After publishing your model, your model version will be required.
 ```bash
 Please enter your model version: Your model version
 ```
-For new version of your existing model, you can just re-run the Upload.py to create a new Zenodo upload and get a new Zenodo DOI. Just the model version and your model compressed folder name need to be different from your existing model.
+In Zenodo, create a new version of file in current upload will generate a new DOI for the file. Therefore, for new version of your existing model, you can just re-run the Upload.py to create a new Zenodo upload and get a new Zenodo DOI. Just the model version and your model compressed folder name need to be different from your existing model.
 
 Then, a new metadata file will be created in Your_Model_Folder.  
 ```

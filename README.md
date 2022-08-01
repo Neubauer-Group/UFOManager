@@ -67,11 +67,11 @@ For metadata.json, basic information is required. You can see the requirements i
 And you need to make sure that Your_Model_Folder lies in subpath of your current working folder.
 ```
 --Your current working directory
+ --Your_virtual_envirenment_name
  --FolderA
   --FolderB
    ...
     --Your_Model_Folder
- --Your_virtual_envirenment_name
 ```
 ## Usage
 After everything being set up, you can download Upload.py, put it in your current working directory, and start the python script through the command line
@@ -81,7 +81,7 @@ $ python2 or python3 Upload.py
 ### Validation Check
 First, path of Your_Model_Folder, start from your current working directory, will be required
 ```bash
-$ Please enter the path of your folder, starting from your current working directory:: FolderA/FolderB/.../Your_Model_Folder
+$ Please enter the path of your folder, starting from your current working directory: FolderA/FolderB/.../Your_Model_Folder
 ```
 Then, your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, the Upload.py will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model. Those information will be included in a new metadata file in later steps.
 ### Zenodo Upload

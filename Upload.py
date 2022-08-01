@@ -302,6 +302,7 @@ assert file['Author']
 for i in file['Author']:
     assert i['affiliation']
     assert i['name']
+    assert i['contact']
 assert file['Paper_id']
 assert file['Description']
 

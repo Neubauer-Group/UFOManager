@@ -153,7 +153,7 @@ else:
     download_list = download_command.split(',')
     download_doi = []
     for file in download_list:
-        with open(file) as metadata:
+        with open(file,encoding='utf-8') as metadata:
             metadatafile = json.load(metadata)
         download_doi.append(metadatafile['Model Doi'])
 

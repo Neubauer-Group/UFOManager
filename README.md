@@ -34,11 +34,7 @@ After that, install neccessary packages,
 ```bash
 (Your_virtual_envirenment_name)$ pip install requests, PyGithub
 ```
-With python 2.7 as you python path, you need to install the virtualenv first,
-```bash
-$ python -m pip install virtualenv
-```
-or with python 3 as your python path, use
+To build a Python2 virtual environment with Python 3 supported system
 ```bash
 $ python3 -m pip install virtualenv
 ```

@@ -299,10 +299,12 @@ with open('metadata.json',encoding='utf-8') as metadata:
     file = json.load(metadata)
 
 assert file['Author']
+all_contact = []
 for i in file['Author']:
-    assert i['affiliation']
     assert i['name']
-    assert i['contact']
+    if 'contact' in i:
+        all_contact.append(i['contact'])
+assert all_contact != []
 assert file['Paper_id']
 assert file['Description']
 
@@ -341,8 +343,11 @@ modelname = raw_input('Please name your model:')
 Author_Full_Information = [i for i in file['Author']]
 Author_Information = []
 for i in Author_Full_Information:
-    Author_Information.append({"name": i['name'],
-                               "affiliation": i['affiliation']})
+    if 'affiliation' in i:
+        Author_Information.append({"name": i['name'],
+                                   "affiliation": i['affiliation']})
+    else:
+        Author_Information.append({"name": i['name']})
 
 data = { 'metadata' : {
           'title': modelname,

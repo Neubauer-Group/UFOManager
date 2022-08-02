@@ -130,7 +130,7 @@ Users can use Download.py to search for UFO models through their metadata preser
 ## Environment Build
 The Download.py is developed only for python 3. A Python virtual environment is recommended for executing the Upload.py in command line interface. And necessary Python packages are needed.
 
-With Python3 as your python path, you can use
+In the Python3 supported system, you can use
 ```bash
 $ python3 -m venv Your_virtual_envirenment_name
 ```

@@ -42,28 +42,79 @@ for i in original_file:
         else:
             tarfile.open(i).extractall('ModelFolder')
 
-# Check the completeness of the whole model as a python package
-sys.path.append(folder_path)
-
-if sys.version_info.major ==3:
-    modelpath = folder_path + '/ModelFolder'
-    sys.path.insert(0,modelpath)
-
-try:
-    importlib.import_module('ModelFolder')
-except SyntaxError:
-    raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
-except ModuleNotFoundError:
-    raise Exception('You model contains no parameters.py, please check again')
-except AttributeError:
-    raise Exception('You may forget to define variables in your imported modules, please check again.')
-except NameError:
-    raise Exception('You may forget to import/define some modules/variables, please check again.')
-except TypeError:
-    raise Exception('One/Some of your variables missing required positional argument, please check again.')
+# Check the completeness of model as a python package
+ModelFolder_Files = os.listdir('ModelFolder')
+if '__init__.py' in ModelFolder_Files:
+     sys.path.append(folder_path)
+     modelpath = folder_path + '\ModelFolder'
+     sys.path.insert(0,modelpath)
+     if sys.version_info.major ==3:
+          # Python 2 has no MuduleNotFoundError
+          try:
+               importlib.import_module('ModelFolder')
+          except SyntaxError:
+               raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+          except ModuleNotFoundError:
+               raise Exception('You model contains no parameters.py, please check again')
+          except AttributeError:
+               raise Exception('You may forget to define variables in your imported modules, please check again.')
+          except NameError:
+               raise Exception('You may forget to import/define some modules/variables, please check again.')
+          except TypeError:
+               raise Exception('One/Some of your variables missing required positional argument, please check again.')
+     else:
+          try:
+               importlib.import_module('ModelFolder')
+          except SyntaxError:
+               raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
+          except ImportError:
+               raise Exception('You model contains no parameters.py, please check again')
+          except AttributeError:
+               raise Exception('You may forget to define variables in your imported modules, please check again.')
+          except NameError:
+               raise Exception('You may forget to import/define some modules/variables, please check again.')
+          except TypeError:
+               raise Exception('One/Some of your variables missing required positional argument, please check again.')
+     
+     os.chdir('ModelFolder')
+else:
+     os.chdir('ModelFolder')
+     path = os.getcwd()
+     sys.path.append(path)
+     modelpath = path +'\%s' %(ModelFolder_Files[0])
+     sys.path.insert(0,modelpath)
+     if sys.version_info.major ==3:
+          # Python 2 has no MuduleNotFoundError
+          try:
+               importlib.import_module(ModelFolder_Files[0])
+          except SyntaxError:
+               raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+          except ModuleNotFoundError:
+               raise Exception('You model contains no parameters.py, please check again')
+          except AttributeError:
+               raise Exception('You may forget to define variables in your imported modules, please check again.')
+          except NameError:
+               raise Exception('You may forget to import/define some modules/variables, please check again.')
+          except TypeError:
+               raise Exception('One/Some of your variables missing required positional argument, please check again.')
+     else:
+          try:
+               importlib.import_module(ModelFolder_Files[0])
+          except SyntaxError:
+               raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
+          except ImportError:
+               raise Exception('You model contains no parameters.py, please check again')
+          except AttributeError:
+               raise Exception('You may forget to define variables in your imported modules, please check again.')
+          except NameError:
+               raise Exception('You may forget to import/define some modules/variables, please check again.')
+          except TypeError:
+               raise Exception('One/Some of your variables missing required positional argument, please check again.')
+     
+     os.chdir(ModelFolder_Files[0])
 
 # Show all files in the model
-ModelFiles = os.listdir('ModelFolder')
+ModelFiles = os.listdir('.')
 print('Your model contains')
 print(ModelFiles)
 
@@ -76,8 +127,6 @@ if MissingFiles != []:
     raise Exception('Sorry, your upload fails since your model is short of some necessary files.')
 
 # Get into the model folder and ready for furthur test
-os.chdir('ModelFolder')
-
 model_path = os.getcwd()
 
 sys.path.insert(0,model_path)
@@ -295,7 +344,7 @@ shutil.rmtree('ModelFolder')
 
 
 # Check uploaded metadata.json
-with open('metadata.json',encoding='utf-8') as metadata:
+with open('metadata.json') as metadata:
     file = json.load(metadata)
 
 assert file['Author']

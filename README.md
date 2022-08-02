@@ -21,7 +21,7 @@ You need to do a series of preparation work before being able to use the Upload.
 ### Environment Build
 The Upload.py is suitable in both Python2/3 environment. A Python virtual environment is recommended for executing the Upload.py in command line interface. And necessary Python packages are needed.
 
-With Python3 as your python path, you can use
+In the Python3 supported system, you can use
 ```bash
 $ python3 -m venv Your_virtual_envirenment_name
 ```
@@ -34,7 +34,7 @@ After that, install neccessary packages,
 ```bash
 (Your_virtual_envirenment_name)$ pip install requests, PyGithub
 ```
-To build a Python2 virtual environment with Python 3 supported system
+To build a Python2 virtual environment with Python3 supported system
 ```bash
 $ python3 -m pip install virtualenv
 ```

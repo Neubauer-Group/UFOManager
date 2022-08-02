@@ -1,11 +1,11 @@
 {
     "Author": [
         {"name" : "NAME",
-         "affiliation": "AFFILIATION",
-         "contact": "contact email address"},
+         "affiliation(optional)": "AFFILIATION",
+         "contact(optional)": "contact email address"},
         {"name" : "NAME",
-         "affiliation": "AFFILIATION",
-         "contact": "contact email address"}
+         "affiliation(optional)": "AFFILIATION",
+         "contact(optional)": "contact email address"}
     ],
     "Paper_id": {
         "doi" : "Digital Object Identifier",

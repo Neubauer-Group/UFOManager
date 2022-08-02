@@ -60,6 +60,9 @@ For compressed folder, tarball and zip are accepted with UFO model python script
     ...
 ```
 For metadata.json, basic information is required. You can see the requirements in [example](https://github.com/ThanosWang/UFOModel_Upload_Download/blob/main/metadata.json)
+
+Note: For arthuor information in metadata.json, affiliation and contact are optional, but at least one contact is needed.
+
 And you need to make sure that Your_Model_Folder lies in subpath of your current working folder.
 ```
 --Your current working directory

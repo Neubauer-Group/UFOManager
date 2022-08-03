@@ -53,27 +53,47 @@ if '__init__.py' in ModelFolder_Files:
           try:
                importlib.import_module('ModelFolder')
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
           except ModuleNotFoundError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      else:
           try:
                importlib.import_module('ModelFolder')
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
           except ImportError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      
      os.chdir('ModelFolder')
@@ -88,27 +108,47 @@ else:
           try:
                importlib.import_module(ModelFolder_Files[0])
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
           except ModuleNotFoundError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      else:
           try:
                importlib.import_module(ModelFolder_Files[0])
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
           except ImportError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      
      os.chdir(ModelFolder_Files[0])

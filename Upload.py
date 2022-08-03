@@ -318,7 +318,7 @@ try:
 except ImportError:
     os.chdir(folder_path)
     shutil.rmtree('ModelFolder')
-    raise Exception('Your model may not have verticesS.py. Please check again')
+    raise Exception('Your model may not have vertices.py. Please check again')
 # Check if vertices.py contains vertices
 vertex = []
 number_of_vertices = 0

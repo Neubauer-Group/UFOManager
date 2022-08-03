@@ -478,7 +478,7 @@ newcontent = {'Model name' : modelname,
               'Number of vertices' : number_of_vertices,
               'Number of coupling orders' : number_of_coupling_orders,
               'Number of coupling tensors' : number_of_coupling_tensors,
-              'Number of lorentz tensors' : number_of_lorentz_tensors,
+              'Number of lorentz tensors' : number_of_lorentz_tensors
               }
 
 file.update(newcontent)

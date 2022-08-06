@@ -148,12 +148,12 @@ The Download.py utilizes [zenodo_get](https://github.com/dvolgyes/zenodo_get) fr
 pip install requests, PyGithub, zenodo_get
 ```
 ## Usage
-To use Download.py, just download it and put it anywhere you want and execute it.
-```bash
-$ python3 Download.py
-```
-Then, your Github personal access token will be require to access [UFO Models Preservation repository](https://github.com/ThanosWang/UFOModel_Metadata_Preservation). The input uses getpass() to ensure the safety.
+To use Download.py, just download it and put it anywhere you want and execute it. The Download.py allows 3 choices for users: simply search for models, simply download models, or do both. In each step, your github personal access token is needed, and getpass() is used as input to ensure safety.
 ### UFO Model Search
+To simply search for UFO models, use
+```
+$ python Download.py 'Search for model'
+```
 After that, you will be able to search for UFO models you need. Currently, the Download.py supports search on four types of information through UFO model metadata files: corresponding paper id of the model, Model's Zenodo DOI, pdg codes or names of particles in the model.
 ```bash
 $ Please choose your keyword type: Paper_id, Model Doi, pdg code, or name
@@ -168,11 +168,15 @@ Then, you will get the feedback about which metadata files contains information 
 $ Do you still want to search for models? Please type in Yes or No. Yes or No
 ```
 ### UFO Model Download
-After you finishing all your search, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. Or you can type No to exit.
+To simply download UFO models, use
 ```
-$ You can choose the metadata you want to download, or type No to exsit: meta1.json, meta2.json, ...
+$ python Download.py 'Download model'
 ```
-Then, you will be asked to create a folder, and all UFO models you need will be downloaded to that folder.
+Then, you can download UFO models you need, by typing in their corresponding metadata file full name (.json is required) and separated them with ','. The full names will be shown with your search feedback. 
+```
+$ You can choose the metadata you want to download: meta1.json, meta2.json, ...
+```
+After that, you will be asked to create a folder, and all UFO models you need will be downloaded to that folder.
 ```bash
 $ Please name your download folder: Your_Download_Folder
 ```
@@ -182,3 +186,9 @@ And the folder is under your current working path.
  --Download.py
  --Your_Download_Folder
 ```
+### Search and Download 
+To both search for and download UFO models, just use
+```
+$ python Download.py 'Search and Download'
+```
+And follow steps in UFO Model Search and UFO Model Download. 

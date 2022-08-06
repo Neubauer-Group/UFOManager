@@ -53,27 +53,47 @@ if '__init__.py' in ModelFolder_Files:
           try:
                importlib.import_module('ModelFolder')
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
           except ModuleNotFoundError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      else:
           try:
                importlib.import_module('ModelFolder')
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
           except ImportError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      
      os.chdir('ModelFolder')
@@ -88,27 +108,47 @@ else:
           try:
                importlib.import_module(ModelFolder_Files[0])
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
           except ModuleNotFoundError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      else:
           try:
                importlib.import_module(ModelFolder_Files[0])
           except SyntaxError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('Your model may be not compatible with Python2, please use Python3 instead.')
           except ImportError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You model contains no parameters.py, please check again')
           except AttributeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to define variables in your imported modules, please check again.')
           except NameError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('You may forget to import/define some modules/variables, please check again.')
           except TypeError:
+               os.chdir(folder_path)
+               shutil.rmtree('ModelFolder')
                raise Exception('One/Some of your variables missing required positional argument, please check again.')
      
      os.chdir(ModelFolder_Files[0])
@@ -158,7 +198,7 @@ for i in [item for item in dir(parameters) if not item.startswith("__")]:
 if len(params) == 0:
     raise Exception('There should be parameters defined in you parameters.py.')
 
-print('You model contains %i parameters.' %(number_of_params))
+print('Your model contains %i parameters.' %(number_of_params))
 
 del sys.modules['parameters']
 
@@ -192,9 +232,9 @@ if len(particle_dict) == 0:
 if len(set(pdg_code_list)) != len(pdg_code_list):
     raise Exception('Some of your particles have same pdg code, please check again!')
 
-print('You model contains %i particles and corresponding pdg code below:' %(number_of_particles))
+print('Your model contains %i particles and corresponding pdg code below:' %(number_of_particles))
 print(particle_dict)
-print('You model contains new elementary particles below:')
+print('Your model contains new elementary particles below:')
 print(new_particle_dict)
 
 del sys.modules['particles']
@@ -219,7 +259,7 @@ for i in [item for item in dir(lorentz) if not item.startswith("__")]:
 if len(lorentz_tensor) == 0:
     raise Exception('There should be lorentz tensors defined in you lorentz.py.')
 
-print('You model contains %i lorentz tensors.' %(number_of_lorentz_tensors))
+print('Your model contains %i lorentz tensors.' %(number_of_lorentz_tensors))
 
 del sys.modules['lorentz']
 
@@ -243,7 +283,7 @@ for i in [item for item in dir(coupling_orders) if not item.startswith("__")]:
 if len(coupling_order) == 0:
     raise Exception('There should be coupling orders defined in you couplings.py.')
 
-print('You model contains %i coupling orders.' %(number_of_coupling_orders))
+print('Your model contains %i coupling orders.' %(number_of_coupling_orders))
 
 del sys.modules['coupling_orders']
 
@@ -267,7 +307,7 @@ for i in [item for item in dir(couplings) if not item.startswith("__")]:
 if len(coupling_tensor) == 0:
     raise Exception('There should be coupling tensors defined in you couplings.py.')
 
-print('You model contains %i coupling tensors.' %(number_of_coupling_tensors))
+print('Your model contains %i coupling tensors.' %(number_of_coupling_tensors))
 
 del sys.modules['couplings']
 
@@ -278,7 +318,7 @@ try:
 except ImportError:
     os.chdir(folder_path)
     shutil.rmtree('ModelFolder')
-    raise Exception('Your model may not have verticesS.py. Please check again')
+    raise Exception('Your model may not have vertices.py. Please check again')
 # Check if vertices.py contains vertices
 vertex = []
 number_of_vertices = 0
@@ -291,7 +331,7 @@ for i in [item for item in dir(vertices) if not item.startswith("__")]:
 if len(vertex) == 0:
     raise Exception('There should be vertices defined in you vertices.py')
 
-print('You model contains %i vertices.' %(number_of_vertices))
+print('Your model contains %i vertices.' %(number_of_vertices))
 
 del sys.modules['vertices']
 
@@ -311,7 +351,7 @@ try:
     if len(props) == 0:
         raise Exception('There should be propagators defined in you propagators.py')
 
-    print('You model contains %i propagators.' %(number_of_propagators))
+    print('Your model contains %i propagators.' %(number_of_propagators))
     del sys.modules['propagators']  
 except ImportError:
     pass
@@ -332,7 +372,7 @@ try:
     if len(decay) == 0:
         raise Exception('There should be decays defined in you decays.py')
 
-    print('You model contains %i decays.' %(number_of_decays))
+    print('Your model contains %i decays.' %(number_of_decays))
     del sys.modules['decays']
 except ImportError:
     pass
@@ -438,7 +478,7 @@ newcontent = {'Model name' : modelname,
               'Number of vertices' : number_of_vertices,
               'Number of coupling orders' : number_of_coupling_orders,
               'Number of coupling tensors' : number_of_coupling_tensors,
-              'Number of lorentz tensors' : number_of_lorentz_tensors,
+              'Number of lorentz tensors' : number_of_lorentz_tensors
               }
 
 file.update(newcontent)

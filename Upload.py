@@ -472,14 +472,14 @@ def uploader(model_path):
 
     # Zenodo Upload
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         print("URL connection with Zenodo Failed\nStatus Code: {}\nMessage: {}".format(r.json()["status"], r.json()["message"]))
         raise Exception
     # Create an empty upload
     headers = {"Content-Type": "application/json"}
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions", 
+    r = requests.post("https://zenodo.org/api/deposit/depositions", 
                     params= params,
                     json= {},
                     headers= headers)
@@ -521,7 +521,7 @@ def uploader(model_path):
     }
 
     # Add required metadata to draft
-    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
                     params={'access_token': Zenodo_Access_Token}, 
                     data=json.dumps(data),
                     headers=headers)
@@ -562,7 +562,7 @@ def uploader(model_path):
     g = Github(Github_Access_Token)
 
     # Get the Public Repository
-    repo = g.get_repo('ThanosWang/PracticeRepo')
+    repo = g.get_repo('ThanosWang/UFOMetadata')
 
     github_user = g.get_user()
 
@@ -587,7 +587,7 @@ def uploader(model_path):
         print('Now you can go to Zenodo to see your draft, make some changes, and be ready to publish your model.')
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No:')
         if publish_command == 'Yes':
-            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                             params={'access_token': Zenodo_Access_Token} )
             print(r.json())
             print(r.status_code)

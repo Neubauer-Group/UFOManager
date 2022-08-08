@@ -2,7 +2,8 @@
     "Author": [
         {"name" : "NAME",
          "affiliation(optional)": "AFFILIATION",
-         "contact(optional)": "contact email address"},
+         "contact(optional)": "contact email address",
+         "Comment (Don't include)": "Affiliation and contact are optional, but at least one contact is needed."},
         {"name" : "NAME",
          "affiliation(optional)": "AFFILIATION",
          "contact(optional)": "contact email address"}

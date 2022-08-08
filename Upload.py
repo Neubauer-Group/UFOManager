@@ -9,61 +9,75 @@ import requests
 from github import Github
 from getpass import getpass
 import argparse
+from termcolor import colored, cprint
+import re
 
 if sys.version_info.major == 3:
     raw_input = input
 
-Path = raw_input('Please enter the path of your folder, starting from your current working directory:')
-
-# Get into the folder
-os.chdir(Path)
-
-# Path of the folder's content
-model_path = os.getcwd()
+regex = r'[^@]+@[^@]+\.[^@]+'
 
 def validator(model_path):
-    global Path
+    #global Path
     ## Check for necessary files
     # List of all files in the folder
     original_file = os.listdir(model_path)
 
     #  Check if the folder contains and only contains required files
-    assert len(original_file) == 2
+    assert len(original_file) == 2, \
+        colored('File Count check: ') + colored('FAILED! More than two files inside the given directory'.format(model_path), 'red')
+    print(colored('File Count check: ') + colored('PASSED!', 'green'))
 
-    assert 'metadata.json' in original_file
+    assert 'metadata.json' in original_file, \
+          colored('Check if initial "metadata.json" exists: ') + colored('FAILED!', 'red')
+    print(colored('Check if initial "metadata.json" exists: ') + colored('PASSED!', 'green'))
 
     # Check uploaded metadata.json
     with open('metadata.json') as metadata:
         file = json.load(metadata)
 
-    assert file['Author']
+    try:
+        assert file['Author']
+    except:
+        raise Exception(colored('"Author" field does not exist in metadata', 'red'))
     all_contact = []
     for i in file['Author']:
-        assert i['name']
+        try:
+            assert i['name'].strip()
+        except:
+            raise Exception(colored('At least one author name does not exist in metadata', 'red'))
         if 'contact' in i:
+            assert re.match(regex, i['contact'].strip()), \
+                Exception(colored('At least one author contact is not a valid email address', 'red'))
             all_contact.append(i['contact'])
-    try:
-        assert all_contact != []
-    except AssertionError:
-        raise Exception('There should be at least one contact information in your metadata.json.')
+    assert all_contact != [], colored('No contact information for authors exists ', 'red')
+    print('Check author information and contact information in initial metadata:' + colored(' PASSED!', 'green'))
 
-    assert file['Paper_id']
+    try:
+        assert file['Paper_id']
+    except:
+        raise Exception(colored('"Paper_id" field does not exist in metadata', 'red'))
     if 'doi' in file['Paper_id']:
         url = 'https://doi.org/' + file['Paper_id']['doi']
         doi_webpage = requests.get(url)
-        assert doi_webpage.status_code < 400
+        assert doi_webpage.status_code < 400, colored('DOI does not resolve to a valid paper', 'red')
     if 'arXiv' in file['Paper_id']:
         url = 'https://arxiv.org/abs/' + file['Paper_id']['arXiv']
         arXiv_webpage = requests.get(url)
-        assert arXiv_webpage.status_code < 400
+        assert arXiv_webpage.status_code < 400, colored('arxiv id does not resolve to a valid paper', 'red')
+    print('Check paper information in initial metadata:' + colored(' PASSED!', 'green'))
 
-    assert file['Description']
+    try:
+        assert file['Description']
+    except:
+        raise Exception(colored('"Description" field does not exist in metadata', 'red'))
 
     for i in original_file:
         if i.endswith('.json'):
             pass
         else:
-            assert i.endswith('.zip') or i.endswith('.tgz') or i.endswith('.tar.gz')
+            assert i.endswith('.zip') or i.endswith('.tgz') or i.endswith('.tar.gz'), \
+                colored('Compressed UFO model not found', 'red')
             # Uncompress the model file to a temprory folder to get ready for validation test
             if i.endswith('.zip'):
                 with zipfile.ZipFile(i, 'r') as zip:
@@ -75,7 +89,7 @@ def validator(model_path):
     ModelFolder_Files = os.listdir('ModelFolder')
     if '__init__.py' in ModelFolder_Files:
         sys.path.append(model_path)
-        modelpath = model_path + '\ModelFolder'
+        modelpath = model_path + '/ModelFolder'
         sys.path.insert(0,modelpath)
         if sys.version_info.major == 3:
             try:
@@ -83,53 +97,58 @@ def validator(model_path):
             except SyntaxError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+                raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
+                                        'red'))
             except ModuleNotFoundError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You model misses some files, please check again')
+                raise Exception(colored('The model may be missing some files, please check again', 'red'))
             except AttributeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to define variables in your imported modules, please check again.')
+                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
             except NameError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to import/define some modules/variables, please check again.')
+                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
             except TypeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('One/Some of your variables missing required positional argument, please check again.')
+                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
         else:
             try:
                 UFOModel = importlib.import_module(ModelFolder_Files[0])
             except SyntaxError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+                raise Exception('Your model may have invalid syntaxes, please check again')
             except ImportError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You model misses some files, please check again')
+                raise Exception(colored('The model may be missing some files, please check again', 'red'))
+                #raise Exception('You model misses some files, please check again')
             except AttributeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to define variables in your imported modules, please check again.')
+                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+                # raise Exception('You may forget to define variables in your imported modules, please check again.')
             except NameError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to import/define some modules/variables, please check again.')
+                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+                # raise Exception('You may forget to import/define some modules/variables, please check again.')
             except TypeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('One/Some of your variables missing required positional argument, please check again.')
+                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+                # raise Exception('One/Some of your variables missing required positional argument, please check again.')
 
         os.chdir('ModelFolder')
     else:
         os.chdir('ModelFolder')
         path = os.getcwd()
         sys.path.append(path)
-        modelpath = path +'\%s' %(ModelFolder_Files[0])
+        modelpath = path +'/%s' %(ModelFolder_Files[0])
         sys.path.insert(0,modelpath)
         if sys.version_info.major == 3:
             try:
@@ -137,49 +156,50 @@ def validator(model_path):
             except SyntaxError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+                raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
+                                        'red'))
             except ModuleNotFoundError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You model misses some files, please check again')
+                raise Exception(colored('The model may be missing some files, please check again', 'red'))
             except AttributeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to define variables in your imported modules, please check again.')
+                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
             except NameError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to import/define some modules/variables, please check again.')
+                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
             except TypeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('One/Some of your variables missing required positional argument, please check again.')
+                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
         else:
             try:
                 UFOModel = importlib.import_module(ModelFolder_Files[0])
             except SyntaxError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('Your model may be not compatible with Python3, please use Python2 instead.')
+                raise Exception('Your model may have invalid syntaxes, please check again')
             except ImportError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You model misses some files, please check again')
+                raise Exception(colored('The model may be missing some files, please check again', 'red'))
             except AttributeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to define variables in your imported modules, please check again.')
+                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
             except NameError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('You may forget to import/define some modules/variables, please check again.')
+                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
             except TypeError:
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
-                raise Exception('One/Some of your variables missing required positional argument, please check again.') 
-     
+                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
         os.chdir(ModelFolder_Files[0])
 
+    print("Check for module imported as a python package: " + colored("PASSED!", "green"))
     # Show all files in the model
     ModelFiles = os.listdir('.')
 
@@ -187,21 +207,21 @@ def validator(model_path):
     Neccessary_MI_Files = ['__init__.py', 'object_library.py', 'function_library.py', 'write_param_card.py']
     Missing_MI_Files = [i for i in Neccessary_MI_Files if i not in ModelFiles]
     if Missing_MI_Files != []:
-        print('Your model lacks these files below')
-        print(Missing_MI_Files)
-        raise Exception('Sorry, your model misses some necessary model-independent files.')
+        print(colored('Your model lacks these files below'))
+        print(colored(', '.join(Missing_MI_Files), 'brown'))
+        raise Exception(colored('Sorry, your model misses some necessary model-independent files.', 'red'))
     else:
-        print("Your model contains necessary model-independent files.")
+        print("Check if model contains necessary model-independent files: " + colored("PASSED!", 'green'))
 
     # Check the existence of model-dependent files
     Neccessary_MD_Files = ['parameters.py','particles.py','coupling_orders.py','couplings.py','lorentz.py','vertices.py']
     Missing_MD_Files = [i for i in Neccessary_MD_Files if i not in ModelFiles]
     if Missing_MD_Files != []:
-        print('Your model lacks these files below')
-        print(Missing_MD_Files)
-        raise Exception('Sorry, your model misses some necessary model-dependent files.')
+        print(colored('Your model lacks these files below'))
+        print(colored(', '.join(Missing_MD_Files), 'brown'))
+        raise Exception(colored('Sorry, your model misses some necessary model-dependent files.', 'red'))
     else:
-        print("Your model contains necessary model-dependent files.")
+        print("Check if model contains necessary model-dependent files: " + colored("PASSED!", 'green'))
 
     # Get into the model folder and ready for furthur test
     model_folder_path = os.getcwd()
@@ -216,7 +236,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your parameters.py may have some problems. Please check again')
+        raise Exception(colored('The file "parameters.py" could not be imported. Please check again', 'red'))
     
     # Check if parameters.py contains parameters
     params = []
@@ -228,9 +248,10 @@ def validator(model_path):
             number_of_params += 1
 
     if len(params) == 0:
-        raise Exception('There should be parameters defined in you parameters.py.')
+        raise Exception(colored('There should be some parameters defined in "parameters.py"', 'red'))
     else:
-        print('Your parameters.py works well. Your model contains %i parameters.' %(number_of_params))
+        print('Check if model contains well behaved "parameters.py": ' + colored("PASSED!", 'green'))
+        print('The model contains %i parameters.' %(number_of_params))
 
     del sys.modules['parameters']
     
@@ -241,7 +262,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your particles.py may have some problems. Please check again')    
+        raise Exception(colored('The file "particles.py" could not be imported. Please check again', 'red'))
     # Check if particles.py contains particles
     particle_dict = {}
     new_particle_dict = {}
@@ -259,19 +280,18 @@ def validator(model_path):
                 new_particle_dict[item.name] = item.pdg_code
 
     if len(particle_dict) == 0:
-        raise Exception('There should be particles defined in you particles.py.')
+        raise Exception(colored('There should be particles defined in "particles.py"', 'red'))
 
     if len(set(pdg_code_list)) != len(pdg_code_list):
-        raise Exception('Some of your particles have same pdg code, please check again!')
+        raise Exception(colored('Some of your particles have same pdg code, please check again!', 'red'))
     
-    print('Your particles.py works well.')
-    print('You model contains %i particles and corresponding pdg code below:' %(number_of_particles))
-    print(particle_dict)
-    print('You model contains new elementary particles below:')
-    print(new_particle_dict)
+    print('Check if model contains well behaved "particles.py": ' + colored("PASSED!", 'green'))
+    print('The model contains %i fundamental particles' %(number_of_particles))
+    print('The model contains %i new elementary particles and corresponding pdg codes are:'%(len(list(new_particle_dict.keys()))))
+    for key in new_particle_dict.keys():
+        print(key, new_particle_dict[key])
 
     del sys.modules['particles']
-
 
 
     try:
@@ -279,7 +299,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your vertices.py may have some problems. Please check again')
+        raise Exception(colored('The file "vertices.py" could not be imported. Please check again', 'red'))
     # Check if vertices.py contains vertices
     vertex = []
     number_of_vertices = 0
@@ -290,9 +310,11 @@ def validator(model_path):
             number_of_vertices += 1
 
     if len(vertex) == 0:
-        raise Exception('There should be vertices defined in you vertices.py')
+        raise Exception(colored('There should be vertices defined in "vertices.py"', 'red'))
     else:
-        print('Your vertices.py works well. Your model contains %i vertices.' %(number_of_vertices))
+        print('Check if model contains well behaved "vertices.py": ' + colored("PASSED!", 'green'))
+        print('The model contains %i vertices' %(number_of_vertices))
+
         
     del sys.modules['vertices']
 
@@ -303,7 +325,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your coupling_orders.py may have some problems. Please check again')
+        raise Exception(colored('The file "coupling_orders.py" could not be imported. Please check again', 'red'))
     # Check if coupling_orders.py contains orders
     coupling_order = []
     number_of_coupling_orders = 0
@@ -314,9 +336,10 @@ def validator(model_path):
             number_of_coupling_orders += 1
 
     if len(coupling_order) == 0:
-        raise Exception('There should be coupling orders defined in you couplings.py.')
+        raise Exception(colored('There should be coupling orders defined in "coupling_orders.py"','red'))
     else:
-        print('Your coupling_orders.py works well. Your model contains %i coupling orders.' %(number_of_coupling_orders))
+        print('Check if model contains well behaved "coupling_orders.py": ' + colored("PASSED!", 'green'))
+        print('The model contains %i coupling_orders' %(number_of_coupling_orders))
 
     del sys.modules['coupling_orders']
 
@@ -327,7 +350,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your couplings.py may have some problems. Please check again')
+        raise Exception(colored('The file "couplings.py" could not be imported. Please check again', 'red'))
     # Check if couplings.py contains couplings
     coupling_tensor = []
     number_of_coupling_tensors = 0
@@ -338,9 +361,10 @@ def validator(model_path):
             number_of_coupling_tensors += 1
 
     if len(coupling_tensor) == 0:
-        raise Exception('There should be coupling tensors defined in you couplings.py.')
+        raise Exception('There should be coupling tensors defined in "couplings.py"')
     else:
-        print('Your couplings.py works well. Your model contains %i coupling tensors.' %(number_of_coupling_tensors))
+        print('Check if model contains well behaved "couplings.py": ' + colored("PASSED!", 'green'))
+        print('The model contains %i couplings' %(number_of_coupling_tensors))
 
     del sys.modules['couplings']
 
@@ -351,7 +375,7 @@ def validator(model_path):
     except ImportError:
         os.chdir(model_path)
         shutil.rmtree('ModelFolder')
-        raise Exception('Your lorentz.py may have some problems. Please check again')
+        raise Exception(colored('The file "lorentz.py" could not be imported. Please check again', 'red'))
     # Check if lorentz.py contains lorentz tensors
     lorentz_tensor = []
     number_of_lorentz_tensors = 0
@@ -362,9 +386,10 @@ def validator(model_path):
             number_of_lorentz_tensors += 1
 
     if len(lorentz_tensor) == 0:
-        raise Exception('There should be lorentz tensors defined in you lorentz.py.')
+        raise Exception(colored('There should be lorentz tensors defined in "lorentz.py"', 'red'))
     else:
-        print('Your lorentz.py works well. Your model contains %i lorentz tensors.' %(number_of_lorentz_tensors))
+        print('Check if model contains well behaved "lorentz.py": ' + colored("PASSED!", 'green'))
+        print('The model contains %i lorentz tensors' %(number_of_lorentz_tensors))
 
     del sys.modules['lorentz']
 
@@ -382,9 +407,10 @@ def validator(model_path):
                 number_of_propagators += 1
 
         if len(props) == 0:
-            raise Exception('There should be propagators defined in you propagators.py')
+            raise Exception('There should be propagators defined in "propagators.py"')
         else:
-            print('Your propagators.py works well. Your model contains %i propagators.' %(number_of_propagators))
+            print('Check if model contains well behaved "propagators.py": ' + colored("PASSED!", 'green'))
+            print('The model contains %i propagators' %(number_of_propagators))
         del sys.modules['propagators']  
     except ImportError:
         number_of_propagators = 0
@@ -404,9 +430,10 @@ def validator(model_path):
                 number_of_decays += 1
 
         if len(decay) == 0:
-            raise Exception('There should be decays defined in you decays.py')
+            raise Exception('There should be decays defined in "decays.py"')
         else:
-            print('Your decays.py works well. Your model contains %i decays.' %(number_of_decays))
+            print('Check if model contains well behaved "decayss.py": ' + colored("PASSED!", 'green'))
+            print('The model contains %i propagators' %(number_of_decays))
         del sys.modules['decays']
     except ImportError:
         number_of_decays = 0
@@ -616,4 +643,10 @@ args = parser.parse_args()
 RunFunction = FUNCTION_MAP[args.command]
 
 if __name__ == '__main__':
+    #Path = raw_input('Please enter the path of your folder, starting from your current working directory:')
+    Path = "TestModels/VLQ_UFO"
+    # Get into the folder
+    os.chdir(Path)
+    # Path of the folder's content
+    model_path = os.getcwd()
     RunFunction(model_path=model_path)

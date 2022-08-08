@@ -34,7 +34,7 @@ $ . Your_virtual_envirenment_name/bin/activate
 to activate your envirenment.
 After that, install neccessary packages,
 ```bash
-(Your_virtual_envirenment_name)$ pip install requests, PyGithub
+(Your_virtual_envirenment_name)$ pip install requests PyGithub
 ```
 To build a Python2 virtual environment with Python3 supported system
 ```bash

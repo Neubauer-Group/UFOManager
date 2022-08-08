@@ -116,38 +116,40 @@ $ Please name your model: Your model name
 $ Please enter your model version: Your model version
 $ Please enter your Model Doi, enter 0 if not have one: Your Model Doi
 ```
-After that, a new enriched metadata json file will be created in Your_Model_Folder. You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
+After that, a new enriched metadata json file will be created in Your_Model_Folder. 
+```
+--Your_Model_Folder
+ --metadata.json
+ --Your_Model.zip/.tgz/.tar.gz
+ --Your_Model.json
+```
+You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
 
 ### Upload model    
 To publish the model to Zenodo and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) for preservation, use
 ```
 $ python2/3 Upload.py 'Upload model'
 ```
-At the beginning, your Zenodo personal access token and your GitHub personal access token will be required
+At the beginning, your Zenodo personal access token and your GitHub personal access token will be required. The input uses getpass() to ensure the safety.
+```
+$ Please enter your Zenodo access token: Your Zenodo personal access token
+$ Please enter you Github access token: Your Github personal access token 
+```
 Then, the Upload.py will go through the validation check of your model, output necessary model-related information.
+
 After the validation check, the Upload.py will use [Zenodo API](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
 
-Your Zenodo personal access token will be required for uploading your model to Zenodo. The input uses getpass() to ensure the safety.
-```bash
-$ Please enter your Zenodo access token: Your Zenodo Personal Access Token
-```
 During the upload, your need to name your model/give title of your upload. Other neccessary information,creators and description, will be directly from your metadata.json.
 ```bash
 $ Please name your model: Your model name
 ```
-If everything goes well, you can see a new draft in your Zenodo account.
+If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
 
-Then, you can choose whether to publish the draft. Entering Yes to publish it directly, or if you want to add more metadata information, entering No to skip the publish step.
+Then, the Upload.py will generate a new enriched metadata file. This time, only the model version is required.
 ```
-Do you want to publish your model? Yes or No? Yes, or No
+$ Please enter your model version: Your model version
 ```
-Note: You need to publish your model before going to next step. Since before being published, your reserved Zenodo DOI will not be registered by the DOI system. This will affect the upload of your metadata file to Github repository.
-### Generate new metadata
 #### Version issue
-After publishing your model, your model version will be required.
-```bash
-Please enter your model version: Your model version
-```
 In Zenodo, create a new version of file in current upload will generate a new DOI for the file. Therefore, for new version of your existing model, you can just re-run the Upload.py to create a new Zenodo upload and get a new Zenodo DOI. Just the model version and your model compressed folder name need to be different from your existing model.
 
 Then, a new metadata file will be created in Your_Model_Folder.  
@@ -157,17 +159,17 @@ Then, a new metadata file will be created in Your_Model_Folder.
  --Your_Model_versionX.zip/.tgz/.tar.gz
  --Your_Model_versionX.json
 ```
-You can see an example complete [metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) in the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata).
-### Github Upload
-Before start this step, you can first check your new metadata file. If you want to make some changes, you can enter No to exit, create a pull request to the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) by yourself later.
+You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
 
-Otherwise, a Github person access token is required, and the getpass() is used here for safety.
-```
-$ Please enter you Github access token: Your Github personal access token or No
-```
-After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
+After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added.
 
-A auto check will run when pull request is made. This check may last for 3 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact thanoswang@163.com.
+Before finally publish your model and upload new enriched metadata to GitHub, you can make some changes to your Zenodo draft. And choose whether to continue
+```
+$ Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No: Yes, or No
+```
+If you choose Yes, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A auto check will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact thanoswang@163.com.
+
+If you choose No, You can publish your model by yourself and create pull request by yourself. or send your enriched metadata file to thanoswang@163.com.
 
 # Download
 Users can use Download.py to search for UFO models through their metadata preserved in [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) and download them from Zenodo.

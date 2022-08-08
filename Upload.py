@@ -445,10 +445,13 @@ def metadatamaker(model_path):
 
     file.update(newcontent)
     # Output New Metadata
-    if filename.endswith('.zip') or filename.endswith('.tar'):
-        meta_name = filename[0:-4]
-    else:
-        meta_name = filename[0:-7]
+    #if filename.endswith('.zip') or filename.endswith('.tar'):
+    #    meta_name = filename[0:-4]
+    #else:
+    #    meta_name = filename[0:-7]
+    meta_name = filename.split('.')[0]
+    if not meta_name:
+        raise Exception("Invalid filename: '{}', please cheack".format(filename))
 
     metadata_name =  meta_name + '.json'
     with open(metadata_name,'w') as metadata:
@@ -463,20 +466,26 @@ def uploader(model_path):
     
     # Ask for access token
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
+    #print(Zenodo_Access_Token)
     Github_Access_Token = getpass('Please enter you Github access token:')
+    #print(Github_Access_Token)
 
     # Zenodo Upload
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    if r.status_code > 400:
+        print("URL connection with Zenodo Failed\nStatus Code: {}\nMessage: {}".format(r.json()["status"], r.json()["message"]))
+        raise Exception
     # Create an empty upload
     headers = {"Content-Type": "application/json"}
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.post("https://zenodo.org/api/deposit/depositions", 
+    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions", 
                     params= params,
                     json= {},
                     headers= headers)
 
     # Work with Zenodo API
+    
     bucker_url = r.json()["links"]["bucket"]
     Doi = r.json()["metadata"]["prereserve_doi"]["doi"]
     deposition_id = r.json()["id"]
@@ -512,7 +521,7 @@ def uploader(model_path):
     }
 
     # Add required metadata to draft
-    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
                     params={'access_token': Zenodo_Access_Token}, 
                     data=json.dumps(data),
                     headers=headers)
@@ -537,11 +546,13 @@ def uploader(model_path):
     file.update(newcontent)
 
     # Output New Metadata
-    if filename.endswith('.zip') or filename.endswith('.tar'):
-        meta_name = filename[0:-4]
-    else:
-        meta_name = filename[0:-7]
-
+    # if filename.endswith('.zip') or filename.endswith('.tar'):
+    #     meta_name = filename[0:-4]
+    # else:
+    #     meta_name = filename[0:-7]
+    meta_name = filename.split('.')[0]
+    if not meta_name:
+	raise Exception("Invalid filename: '{}', please cheack".format(filename))
     metadata_name =  meta_name + '.json'
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)
@@ -551,7 +562,7 @@ def uploader(model_path):
     g = Github(Github_Access_Token)
 
     # Get the Public Repository
-    repo = g.get_repo('ThanosWang/UFOMetadata')
+    repo = g.get_repo('ThanosWang/PracticeRepo')
 
     github_user = g.get_user()
 
@@ -576,8 +587,10 @@ def uploader(model_path):
         print('Now you can go to Zenodo to see your draft, make some changes, and be ready to publish your model.')
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No:')
         if publish_command == 'Yes':
-            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                             params={'access_token': Zenodo_Access_Token} )
+            print(r.json())
+            print(r.status_code)
             print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
             pr = repo.create_pull(title="Upload metadata for a new model", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
             print('''

@@ -15,9 +15,11 @@ For detailed information of FAIR principles, you can visit [GO FAIR](https://www
 Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. Therefore, we hope to develop FAIR criteria for preservation of UFO models. This repository works as a bridge between UFO model developers and users. In this repository, two python scripts, Upload.py and Downlaod.py, are developed for uploading and downloading UFO models.
 
 # Upload
-Developers can use Upload.py to publish their models. Provided by model files and necessary model inforamtion, the Upload.py will examine the validation of model files, publish the model to Zenodo, generate a metadata json file for the model, and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) for preservation.
+Developers can use Upload.py to publish their models. Provided by model files and necessary model inforamtion, the Upload.py can examine the validation of model files,  generate a metadata json file for the model, publish the model to Zenodo, and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) for preservation.
+
 ## Preparation
 You need to do a series of preparation work before being able to use the Upload.py
+
 ### Environment Build
 The Upload.py is suitable in both Python2/3 environment. A Python virtual environment is recommended for executing the Upload.py in command line interface. And necessary Python packages are needed.
 
@@ -50,13 +52,23 @@ After that, install necessary packages in the same way,
 ### File Preparation
 To use the Upload.py, you need to create Your_Model_Folder with a compressed folder storaging all your model files and a json file called metadata.json.
 
-For compressed folder, tarball and zip are accepted with UFO model python scripts directly inside the folder.
+For compressed folder, tarball and zip are accepted with UFO model python scripts inside the folder.
 ```
 --Your_Model_Folder
  --metadata.json
  --Your_Model.zip/.tgz/.tar.gz
    --_init_.py
    --object_library.py
+    ...
+```
+or
+```
+--Your_Model_Folder
+ --metadata.json
+ --Your_Model.zip/.tgz/.tar.gz
+   --Your_Model Folder
+    --_init_.py
+    --object_library.py
     ...
 ```
 For metadata.json, basic information is required. You can see the requirements in [example](https://github.com/ThanosWang/UFOModel_Upload_Download/blob/main/metadata.json)
@@ -72,18 +84,47 @@ And you need to make sure that Your_Model_Folder lies in subpath of your current
    ...
     --Your_Model_Folder
 ```
+
 ## Usage
-After everything being set up, you can download Upload.py, put it in your current working directory, and start the python script through the command line
-```bash
-$ python2 or python3 Upload.py
-```
-### Validation Check
-First, path of Your_Model_Folder, start from your current working directory, will be required
+After everything being set up, you can download Upload.py, put it in your current working directory and execute it. The Upload.py provides developers with 3 choices:
+'Validation Check', 'Generate metadata', and 'Upload model'.
+
+In each choices, path of Your_Model_Folder, start from your current working directory, will be required
 ```bash
 $ Please enter the path of your folder, starting from your current working directory: FolderA/FolderB/.../Your_Model_Folder
 ```
-Then, your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, the Upload.py will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model. Those information will be included in a new metadata file in later steps.
-### Zenodo Upload
+
+### Validation Check
+To check the validation of your model, use
+```
+$ python2/3 Upload.py 'Validation Check'
+```
+in command line.
+
+Then, the Upload.py will first check your file preparation, like whether your folder contains only two files required, and whether your metadata.json contains necessary information. After that,your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, the Upload.py will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model.
+
+### Generate Metadata
+To generate new metadata of your model, use
+```
+$ python2/3 Upload.py 'Generate metadata'
+```
+in command line.
+
+Then, the Upload.py will go through the validation check of your model and output necessary model-related information. Then, some information is required from developers:
+```
+$ Please name your model: Your model name
+$ Please enter your model version: Your model version
+$ Please enter your Model Doi, enter 0 if not have one: Your Model Doi
+```
+After that, a new enriched metadata json file will be created in Your_Model_Folder. You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
+
+### Upload model    
+To publish the model to Zenodo and push the metadata file to another repository [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) for preservation, use
+```
+$ python2/3 Upload.py 'Upload model'
+```
+At the beginning, your Zenodo personal access token and your GitHub personal access token will be required
+Then, the Upload.py will go through the validation check of your model, output necessary model-related information.
 After the validation check, the Upload.py will use [Zenodo API](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
 
 Your Zenodo personal access token will be required for uploading your model to Zenodo. The input uses getpass() to ensure the safety.

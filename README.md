@@ -135,6 +135,8 @@ At the beginning, your Zenodo personal access token and your GitHub personal acc
 $ Please enter your Zenodo access token: Your Zenodo personal access token
 $ Please enter you Github access token: Your Github personal access token 
 ```
+For your Zenodo personla access token, deposit:actions and desposit:write should be allowed.
+
 Then, the Upload.py will go through the validation check of your model, output necessary model-related information.
 
 After the validation check, the Upload.py will use [Zenodo API](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
@@ -163,7 +165,11 @@ You can see an [example enriched metadata file](https://github.com/ThanosWang/UF
 
 After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added.
 
-Before finally publish your model and upload new enriched metadata to GitHub, you can make some changes to your Zenodo draft. And choose whether to continue
+Before finally publish your model and upload new enriched metadata to GitHub, you can make some changes to your Zenodo draft. 
+
+Note: If you folked [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) before, make sure that your forked branch is up-to-date with orginal one.
+
+And you can choose whether to continue
 ```
 $ Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No: Yes, or No
 ```

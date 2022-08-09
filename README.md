@@ -34,7 +34,7 @@ $ . Your_virtual_envirenment_name/bin/activate
 to activate your envirenment.
 After that, install neccessary packages,
 ```bash
-(Your_virtual_envirenment_name)$ pip install requests PyGithub
+(Your_virtual_envirenment_name)$ pip install requests PyGithub termcolor
 ```
 To build a Python2 virtual environment with Python3 supported system
 ```bash
@@ -47,7 +47,7 @@ $ . Your_virtual_envirenment_name/bin/activate
 ```
 After that, install necessary packages in the same way,
 ```
-(Your_virtual_envirenment_name)$ python -m pip install requests, PyGithub
+(Your_virtual_envirenment_name)$ python -m pip install requests PyGithub termcolor
 ```
 ### File Preparation
 To use the Upload.py, you need to create Your_Model_Folder with a compressed folder storaging all your model files and a json file called metadata.json.

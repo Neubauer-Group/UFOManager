@@ -265,9 +265,9 @@ def validator(model_path):
         raise Exception('Some of your particles have same pdg code, please check again!')
     
     print('Your particles.py works well.')
-    print('You model contains %i particles and corresponding pdg code below:' %(number_of_particles))
+    print('Your model contains %i particles and corresponding pdg code below:' %(number_of_particles))
     print(particle_dict)
-    print('You model contains new elementary particles below:')
+    print('Your model contains new elementary particles below:')
     print(new_particle_dict)
 
     del sys.modules['particles']

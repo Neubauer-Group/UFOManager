@@ -109,6 +109,9 @@ def validator(model_path):
         if '__init__.py' not in os.listdir('ModelFolder/' + ModelFolder_Files[0]):
             raise Exception(colored('"__init__.py" not available within model, not a Python Package!', 'red'))
         for _file in os.listdir('ModelFolder/' + ModelFolder_Files[0]):
+            if _file == "__pycache__" or _file.endswith(".pyc") or _file.endswith("~"):
+                shutil.rmtree('ModelFolder/' + ModelFolder_Files[0] + '/__pycache__')
+                continue
             shutil.copy('ModelFolder/' + ModelFolder_Files[0] + '/' +  _file, 'ModelFolder/' +  _file)
         shutil.rmtree('ModelFolder/' + ModelFolder_Files[0])
 
@@ -464,7 +467,7 @@ def uploader(model_path):
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
@@ -476,7 +479,7 @@ def uploader(model_path):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/PracticeRepo')
+        repo = g.get_repo('ThanosWang/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -497,7 +500,7 @@ def uploader(model_path):
     # Create an empty upload
     headers = {"Content-Type": "application/json"}
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions", 
+    r = requests.post("https://zenodo.org/api/deposit/depositions", 
                     params= params,
                     json= {},
                     headers= headers)
@@ -544,7 +547,7 @@ def uploader(model_path):
     }
 
     # Add required metadata to draft
-    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
                      params=params, #{'access_token': Zenodo_Access_Token}, 
                     data=json.dumps(data),
                     headers=headers)
@@ -579,7 +582,7 @@ def uploader(model_path):
         print('Now you can go to Zenodo to see your draft, make some changes, and be ready to publish your model.')
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No:')
         if publish_command == 'Yes':
-            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                               params=params) #{'access_token': Zenodo_Access_Token} )
             if r.status_code > 400:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
@@ -614,7 +617,6 @@ RunFunction = FUNCTION_MAP[args.command]
 
 if __name__ == '__main__':
     Path = raw_input('Please enter the path of your folder, starting from your current working directory:')
-    #Path = "TestModels/VLQ_UFO_2"
     # Get into the folder
     os.chdir(Path)
     # Path of the folder's content

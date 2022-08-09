@@ -461,19 +461,17 @@ def uploader(model_path):
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
 
-    '''    Ask for access tokens    '''
-    Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
-
     '''    Check if  Zenodo token works    '''
+    Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
     r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
     
-    Github_Access_Token = getpass('Please enter you Github access token:')
 
     '''    Check if Github token works    '''
+    Github_Access_Token = getpass('Please enter you Github access token:')
     try:
         g = Github(Github_Access_Token)
         github_user = g.get_user()
@@ -483,6 +481,17 @@ def uploader(model_path):
         raise Exception(colored("Github access token cannot be validated", "red"))
 
     print("Validating Github access token: " + colored("PASSED!", "green"))
+
+    
+    '''    Check if user's metadata repo is in sync with upstream    '''
+    # Create a fork in user's github
+    myfork = github_user.create_fork(repo)
+
+    # Check if the fork is up to date with main
+    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+        print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
+        print(colored("Please retry after syncing your local fork with upstream", "yellow"))
+        raise Exception
 
     
     # Create an empty upload
@@ -536,7 +545,7 @@ def uploader(model_path):
 
     # Add required metadata to draft
     r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
-                    params={'access_token': Zenodo_Access_Token}, 
+                     params=params, #{'access_token': Zenodo_Access_Token}, 
                     data=json.dumps(data),
                     headers=headers)
     if r.status_code > 400:
@@ -549,28 +558,20 @@ def uploader(model_path):
         json.dump(file,metadata,indent=2)
 
 
-    # Upload to Github Repository
+    '''    Upload to Github Repository    '''
 
-
-    # Get the Public Repository
-
-
-
-
-    # Create a fork in user's github
-    myfork = github_user.create_fork(repo)
 
     # Create new metadata file in the forked repo
     f= open(metadata_name).read()
 
     GitHub_filename = 'Metadata/' + metadata_name
 
-    myfork.create_file(GitHub_filename, 'Upload metadata for a new model', f, branch='main')
+    myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
 
     # Pull Request from forked branch to original
     username = g.get_user().login
 
-    body = 'Upload metadata for a new model'
+    body = 'Upload metadata for new model(s)'
 
     # Final Check before all upload
 
@@ -579,7 +580,7 @@ def uploader(model_path):
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No:')
         if publish_command == 'Yes':
             r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
-                            params={'access_token': Zenodo_Access_Token} )
+                              params=params) #{'access_token': Zenodo_Access_Token} )
             if r.status_code > 400:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
                 print("Status Code: {}".format(r.status_code))

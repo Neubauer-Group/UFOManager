@@ -14,11 +14,11 @@ import re
 
 if sys.version_info.major == 3:
     raw_input = input
-
 regex = r'[^@]+@[^@]+\.[^@]+'
 
 def validator(model_path):
 
+    print("\nChecking Model: " + colored(model_path, "magenta") + "\n")
     '''    Check for necessary files and their formats   '''
     # List of all files in the folder
     original_file = os.listdir(model_path)
@@ -85,18 +85,24 @@ def validator(model_path):
 
     '''    Unpack the model inside a directory called "ModelFolder"     '''
     
-    for i in original_file:
-        if i.endswith('.json'):
+    for _file in original_file:
+        if _file.endswith('.json'):
             pass
+        elif _file.endswith('.zip'):
+            with zipfile.ZipFile(_file, 'r') as zip:
+                zip.extractall('ModelFolder')
+        elif _file.endswith('.tar') or _file.endswith('.tgz') or _file.endswith('.tat.gz'):
+            tarfile.open(_file).extractall('ModelFolder')
+        elif os.path.isdir(_file):
+            cf = tarfile.open( _file + ".tgz", "w:gz")
+            for _f in os.listdir(_file):
+                cf.add(_file + '/' + _f)
+            cf.close()
+            shutil.move(_file, 'ModelFolder')
+            original_file.remove(_file)
+            original_file.append(_file + ".tgz")
         else:
-            assert i.endswith('.zip') or i.endswith('.tgz') or i.endswith('.tar.gz'), \
-                colored('Compressed UFO model not found', 'red')
-            # Uncompress the model file to a temprory folder to get ready for validation test
-            if i.endswith('.zip'):
-                with zipfile.ZipFile(i, 'r') as zip:
-                    zip.extractall('ModelFolder')
-            else:
-                tarfile.open(i).extractall('ModelFolder')
+            raise Exception(colored("Valid Format for UFO directory not found", "red"))
 
                 
     '''    Check if the compressed folder contains a single model and
@@ -420,11 +426,19 @@ def validator(model_path):
     return file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays
 
 
+def validator_all(all_models):
+    base_path = os.getcwd()
+    for _path in all_models:
+        os.chdir(_path)
+        _ = validator(model_path = os.getcwd())
+        os.chdir(base_path)
+
 
 def metadatamaker(model_path, create_file = True):
     # Check Validation and get necessary outputs
     file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays = validator(model_path)
     filename = [i for i in original_file if i != 'metadata.json'][0]
+    print('\nWorking on model: ' + colored(model_path, "magenta") + "\n")
     modelname = raw_input('Please name your model:')
     modelversion = raw_input('Please enter your model version:')
     Doi = "0"
@@ -454,16 +468,118 @@ def metadatamaker(model_path, create_file = True):
         with open(metadata_name,'w') as metadata:
             json.dump(file,metadata,indent=2)
         # Check new metadata
-        print('Now you can see your the metadata file %s for your new model in the same directory.' %(metadata_name))
+        print('Now you can see your the metadata file %s for your new model in the same directory.' %(colored(metadata_name, "magenta")))
 
     return file, filename, modelname, metadata_name
-        
 
-def uploader(model_path):
+
+def metadatamaker_all(all_models):
+    base_path = os.getcwd()
+    for _path in all_models:
+        print("\nChecking Model: " + colored(_path, "magenta") + "\n")
+        os.chdir(_path)
+        _ = metadatamaker(model_path = os.getcwd())
+        os.chdir(base_path)
+
+
+
+
+def uploader(model_path, myfork, params):
     
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
 
+    '''    Check if  Zenodo token works    '''    
+    # Create an empty upload
+    headers = {"Content-Type": "application/json"}
+    r = requests.post("https://zenodo.org/api/deposit/depositions", 
+                      params= params,
+                      json= {},
+                      headers= headers)
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
+    
+    # Work with Zenodo API
+    
+    bucket_url = r.json()["links"]["bucket"]
+    Doi = r.json()["metadata"]["prereserve_doi"]["doi"]
+    deposition_id = r.json()["id"]
+
+    # Upload new files
+    path = model_path + '/%s' %(filename)
+    with open(path, 'rb') as fp:
+        r = requests.put("%s/%s" %(bucket_url, filename),
+                         data = fp,
+                         params = params)
+        if r.status_code > 400:
+            print(colored("Putting content to Zenodo Failed!", "red"))
+            print("Status Code: {}".format(r.status_code))
+            raise Exception
+
+    Author_Full_Information = [i for i in file['Author']]
+    Author_Information = []
+    for i in Author_Full_Information:
+        if 'affiliation' in i:
+            Author_Information.append({"name": i['name'],
+                                    "affiliation": i['affiliation']})
+        else:
+            Author_Information.append({"name": i['name']})
+
+    data = { 'metadata' : {
+            'title': modelname,
+            'upload_type': 'dataset',
+            'description': file['Description'],
+            'creators': Author_Information          
+        }
+    }
+
+    # Add required metadata to draft
+    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+                     params=params,
+                     data=json.dumps(data),
+                     headers=headers)
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
+    file["Model Doi"] = Doi
+
+    with open(metadata_name,'w') as metadata:
+        json.dump(file,metadata,indent=2)
+
+
+    '''    Upload to Github Repository    '''
+
+
+    # Create new metadata file in the forked repo
+    f= open(metadata_name).read()
+    GitHub_filename = 'Metadata/' + metadata_name
+    myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
+
+    if r.status_code == 200:
+        print('Now you can go to Zenodo to see your draft at Doi: %s, make some changes, and be ready to publish your model.'%colored(Doi, 'magenta'))
+        publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
+                                    colored('Yes', 'green') + 'or' + colored('No', 'red') + ':')
+        if publish_command == 'Yes':
+            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+                              params=params)
+            if r.status_code > 400:
+                print(colored("Publishing model with Zenodo Failed!", "red"))
+                print("Status Code: {}".format(r.status_code))
+                raise Exception
+            print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
+            print('You can  access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
+            print('\n\n')
+        else:
+            print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
+    else:
+        print('Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to thanoswang@163.com. I will help upload your metadata to GitHub Repository.')
+
+
+def uploader_all(all_models):
+    
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
@@ -496,129 +612,36 @@ def uploader(model_path):
         print(colored("Please retry after syncing your local fork with upstream", "yellow"))
         raise Exception
 
-    
-    # Create an empty upload
-    headers = {"Content-Type": "application/json"}
-    params = {'access_token': Zenodo_Access_Token}
-    r = requests.post("https://zenodo.org/api/deposit/depositions", 
-                    params= params,
-                    json= {},
-                    headers= headers)
-    if r.status_code > 400:
-        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
-        print("Status Code: {}".format(r.status_code))
-        raise Exception
-    # Work with Zenodo API
-    
-    bucker_url = r.json()["links"]["bucket"]
-    Doi = r.json()["metadata"]["prereserve_doi"]["doi"]
-    deposition_id = r.json()["id"]
-
-     # Upload new files
-    #filename = [i for i in original_file if i != 'metadata.json'][0]
-    path = model_path + '/%s' %(filename)
-
-    with open(path, 'rb') as fp:
-        r = requests.put("%s/%s" %(bucker_url, filename),
-                         data = fp,
-                         params = params)
-        if r.status_code > 400:
-            print(colored("Putting content to Zenodo Failed!", "red"))
-            print("Status Code: {}".format(r.status_code))
-            raise Exception
-    
-
-
-    Author_Full_Information = [i for i in file['Author']]
-    Author_Information = []
-    for i in Author_Full_Information:
-        if 'affiliation' in i:
-            Author_Information.append({"name": i['name'],
-                                    "affiliation": i['affiliation']})
-        else:
-            Author_Information.append({"name": i['name']})
-
-    data = { 'metadata' : {
-            'title': modelname,
-            'upload_type': 'dataset',
-            'description': file['Description'],
-            'creators': Author_Information          
-        }
-    }
-
-    # Add required metadata to draft
-    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
-                     params=params, #{'access_token': Zenodo_Access_Token}, 
-                    data=json.dumps(data),
-                    headers=headers)
-    if r.status_code > 400:
-        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
-        print("Status Code: {}".format(r.status_code))
-        raise Exception
-    file["Model Doi"] = Doi
-
-    with open(metadata_name,'w') as metadata:
-        json.dump(file,metadata,indent=2)
-
-
-    '''    Upload to Github Repository    '''
-
-
-    # Create new metadata file in the forked repo
-    f= open(metadata_name).read()
-
-    GitHub_filename = 'Metadata/' + metadata_name
-
-    myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
+    # Now put all models in zenodo and put their metadata in the local fork of metadata repo
+    base_path = os.getcwd()
+    for _path in all_models:
+        print("\nChecking Model: " + colored(_path, "magenta") + "\n")
+        os.chdir(_path)
+	uploader(model_path = os.getcwd(), myfork = myfork, params = params)
+        os.chdir(base_path)
 
     # Pull Request from forked branch to original
     username = g.get_user().login
-
     body = 'Upload metadata for new model(s)'
+    pr = repo.create_pull(title="Upload metadata for a new model", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
+    print('''
+    You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
+    Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
+    If your pull request failed or workflow doesn't start, please contact''' +  colored('thanoswang@163.com' ,'blue')
+    )
 
-    # Final Check before all upload
-
-    if r.status_code == 200:
-        print('Now you can go to Zenodo to see your draft, make some changes, and be ready to publish your model.')
-        publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No:')
-        if publish_command == 'Yes':
-            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
-                              params=params) #{'access_token': Zenodo_Access_Token} )
-            if r.status_code > 400:
-                print(colored("Publishing model with Zenodo Failed!", "red"))
-                print("Status Code: {}".format(r.status_code))
-                raise Exception
-            #print(r.json())
-            #print(r.status_code)
-            print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
-            print('You can  access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
-            pr = repo.create_pull(title="Upload metadata for a new model", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
-            print('''
-            You have successfully upload your model to Zenodo and create a pull request of your new enriched metadate file to GitHub repository UFOMetadata. 
-            If this is your first time pull request to UFOMetadata, your pull request need to be admitted before being checked by GitHub workflow.
-            If your pull request failed or workflow doesn't start, please contact thanoswang@163.com.
-            ''')
-        else:
-            print("You can publish your model by yourself. Then, please send your enriched metadata file to thanoswang@163.com. I will help upload your metadata to GitHub Repository.")
-    else:
-        print('Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to thanoswang@163.com. I will help upload your metadata to GitHub Repository.')          
-
-
-FUNCTION_MAP = {'Validation Check' : validator,
-                'Generate metadata' : metadatamaker,
-                'Upload model': uploader}
-
-parser = argparse.ArgumentParser()
-parser.add_argument('command', choices=FUNCTION_MAP.keys())
-
-args = parser.parse_args()
-
-RunFunction = FUNCTION_MAP[args.command]
 
 if __name__ == '__main__':
-    Path = raw_input('Please enter the path of your folder, starting from your current working directory:')
-    # Get into the folder
-    os.chdir(Path)
-    # Path of the folder's content
-    model_path = os.getcwd()
-    RunFunction(model_path=model_path)
+    FUNCTION_MAP = {'Validation Check' : validator_all,
+                    'Generate metadata' : metadatamaker_all,
+                    'Upload model': uploader_all}
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', choices=FUNCTION_MAP.keys())
+    args = parser.parse_args()
+    RunFunction = FUNCTION_MAP[args.command]
+
+    TXT = raw_input('Please enter the path to a text file with the list of all UFO models:')
+    with open(TXT) as f:
+        all_models = [line.strip() for line in f.readlines() if not line.strip().startswith('#')]
+    RunFunction(all_models = all_models)

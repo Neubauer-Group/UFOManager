@@ -11,7 +11,7 @@
     "Paper_id": {
         "doi" : "Digital Object Identifier",
         "arXiv" : "arXiv Identifier",
-        "comment (Don't need to include)": "You can use any identifier, but the form should be maintained so that python can read it as a dictionary."
+        "comment (Don't need to include)": "At least one of doi or arXiv identifier must be given"
     },
     "Description": "Write your description of your model here."
 }

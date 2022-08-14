@@ -561,7 +561,7 @@ def uploader(model_path, myfork, params):
     if r.status_code == 200:
         print('Now you can go to Zenodo to see your draft at Doi: %s, make some changes, and be ready to publish your model.'%colored(Doi, 'magenta'))
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
-                                    colored('Yes', 'green') + 'or' + colored('No', 'red') + ':')
+                                    colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
             r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                               params=params)
@@ -575,7 +575,7 @@ def uploader(model_path, myfork, params):
         else:
             print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
     else:
-        print('Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to thanoswang@163.com. I will help upload your metadata to GitHub Repository.')
+        print("Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
 
 
 def uploader_all(all_models):
@@ -627,7 +627,7 @@ def uploader_all(all_models):
     print('''
     You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
     Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
-    If your pull request failed or workflow doesn't start, please contact''' +  colored('thanoswang@163.com' ,'blue')
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
     )
 
 

@@ -75,23 +75,20 @@ For metadata.json, basic information is required. You can see the requirements i
 
 Note: For arthuor information in metadata.json, affiliation and contact are optional, but at least one contact is needed.
 
-And you need to make sure that Your_Model_Folder lies in subpath of your current working folder.
-```
---Your current working directory
- --Your_virtual_envirenment_name
- --FolderA
-  --FolderB
-   ...
-    --Your_Model_Folder
-```
-
 ## Usage
 After everything being set up, you can download Upload.py, put it in your current working directory and execute it. The Upload.py provides developers with 3 choices:
-'Validation Check', 'Generate metadata', and 'Upload model'.
+'Validation Check', 'Generate metadata', and 'Upload model'. 
 
-In each choices, path of Your_Model_Folder, start from your current working directory, will be required
+The Upload.py can deal with multiple models in single execution. Developers need to prepare a .txt file containing paths to their models, each path lies in a single line, for example, in the .txt file
+```
+path-to-model1
+path-to-model2
+...
+```
+
+Then, in each choices, path to the .txt file containing paths to models will be required
 ```bash
-$ Please enter the path of your folder, starting from your current working directory: FolderA/FolderB/.../Your_Model_Folder
+$ Please enter the path to a text file with the list of all UFO models: Path to .txt
 ```
 
 ### Validation Check

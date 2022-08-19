@@ -67,23 +67,39 @@ def Search(Github_Access_Token):
         # Search for models with corresponding paper id
         if search_type == 'Paper_id':
             paper_id = input('Please enter your needed paper_id:')
-
+            
+            required_feedback = ''
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
                     metadatafile = json.load(metadata)
                 paper_ids = [metadatafile['Paper_id'][i] for i in metadatafile['Paper_id']]
                 if paper_id in paper_ids:
                     print('The metadata file %s has the paper_id %s you are looking for.' %(file,paper_id))
+                    required_feedback = file
+            
+            if len(required_feedback) == 0:
+                print('There is no model associated with the paper_id %s you are looking for.' %(paper_id))
         
         # Search for models with corresponding model Doi from Zenodo
         if search_type == 'Model Doi':
             Model_Doi = input('Please enter your needed Model doi:')
 
+            model_name = ''
+            all_version_list = []
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
                     metadatafile = json.load(metadata)
                 if Model_Doi == metadatafile['Model Doi']:
-                    print('The metadata file %s has Model Doi %s you are looking for.' %(file,metadatafile['Model Doi']))
+                    model_name = file
+            if len(model_name) != 0:
+                for file in os.listdir('.'):
+                    if model_name.split('.')[0] in file.split('.'):
+                        all_version_list.append(file)
+                print('Your input Model Doi may match with these files with different versions included: %s' %(str(all_version_list)))
+            else:
+                print('There is no model associated with the Model Doi %s you are looking for.' %(Model_Doi)) 
+            
+
         
         # Search for models with particles' pdg codes
         if search_type == 'pdg code':

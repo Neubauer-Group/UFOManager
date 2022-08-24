@@ -11,6 +11,7 @@ from getpass import getpass
 import argparse
 from termcolor import colored, cprint
 import re
+import datetime
 
 if sys.version_info.major == 3:
     raw_input = input
@@ -91,7 +92,7 @@ def validator(model_path):
         elif _file.endswith('.zip'):
             with zipfile.ZipFile(_file, 'r') as zip:
                 zip.extractall('ModelFolder')
-        elif _file.endswith('.tar') or _file.endswith('.tgz') or _file.endswith('.tat.gz'):
+        elif _file.endswith('.tar') or _file.endswith('.tgz') or _file.endswith('.tar.gz'):
             tarfile.open(_file).extractall('ModelFolder')
         elif os.path.isdir(_file):
             cf = tarfile.open( _file + ".tgz", "w:gz")
@@ -617,7 +618,7 @@ def uploader_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-	uploader(model_path = os.getcwd(), myfork = myfork, params = params)
+        uploader(model_path = os.getcwd(), myfork = myfork, params = params)
         os.chdir(base_path)
 
     # Pull Request from forked branch to original
@@ -631,10 +632,312 @@ def uploader_all(all_models):
     )
 
 
+def updatenewversion(model_path, myfork, params):
+
+    '''    Check for necessary files and their formats    '''
+    original_file = os.listdir(model_path)
+
+    assert 'metadata.json' in original_file, \
+        'Check if initial "metadata.json" exists: ' + colored('FAILED!', 'red')
+    try:
+        metadata = open('metadata.json')
+        file = json.load(metadata)
+    except:
+        raise Exception(colored('Check if initial "metadata.json" is correctly formatted: ') + colored('FAILED!', 'red'))
+    print('Check if initial "metadata.json" exists and correctly formatted: ' + colored('PASSED!', 'green'))
+
+    '''    Check existing model DOI    '''
+    try:
+        assert file['Existing Model Doi']
+    except:
+        raise Exception(colored('"Existing Model Doi" field does not exist in metadata', 'red'))
+
+    try:
+        assert 'zenodo' in file['Existing Model Doi']
+    except:
+        raise Exception(colored('We suggest you to upload your model to Zenodo', 'red'))
+
+
+    '''    Generate the metadata for the model   '''
+    file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
+
+    '''    Check if Zenodo token works    '''
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions',
+                 params=params)
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
+    
+    '''    Find corresponding old version    '''
+    old_deposition_id = ''
+    upload_code = 0
+    for i in r.json():
+        if i['metadata']['doi'] == file['Existing Model Doi']:
+            old_deposition_id = i['id']
+    if len(old_deposition_id) == 0:
+        raise Exception("Your provided Model Doi does not exist in your Zenodo account.")
+    
+    '''    Work on new version    '''
+    # Create new version draft
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/newversion' %(old_deposition_id),params=params)
+    
+    # Get correspond files in provided old version
+    filelist = {}
+    filenames = []
+    for i in r.json()['files']:
+        filelist[i['filename']] = i['id']
+        filenames.append(i['filenames'])
+
+    print('Your previous upload contains %s, do you want to delete them?' %(str(filenames)))
+
+    deletelist = raw_input('Please enter file names you want to delete in your new version,separated names with comma,or Enter No:').split(',')
+
+    # Get new deposition id
+    new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
+
+    if deletelist[0] != 'No':
+        for i in deletelist:
+            r = requests.delete('https://sandbox.zenodo.org/api/deposit/depositions/%s/files/%s'%(new_deposition_id,filelist[i]),
+                         params=params)
+
+    headers = {"Content-Type": "application/json"}
+
+    # Work with new version draft
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+                     json={},
+                     params=params,
+                     headers=headers )
+
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
+
+    bucket_url = r.json()["links"]["bucket"]
+    Doi = r.json()["metadata"]["prereserve_doi"]["doi"]
+    
+    # Upload new model files
+    path = model_path + '/%s' %(filename)
+    with open(path, 'rb') as fp:
+        r = requests.put("%s/%s" %(bucket_url, filename),
+                         data = fp,
+                         params = params)
+        if r.status_code > 400:
+            print(colored("Putting content to Zenodo Failed!", "red"))
+            print("Status Code: {}".format(r.status_code))
+            raise Exception
+
+    # Create Zenodo upload metadata
+    Author_Full_Information = [i for i in file['Author']]
+    Author_Information = []
+    for i in Author_Full_Information:
+        if 'affiliation' in i:
+            Author_Information.append({"name": i['name'],
+                                    "affiliation": i['affiliation']})
+        else:
+            Author_Information.append({"name": i['name']})
+
+    version = raw_input('Please enter your model version')
+    data = { 'metadata' : {
+            'title': modelname,
+            'upload_type': 'dataset',
+            'description': file['Description'],
+            'creators': Author_Information,
+            'version': version,
+            'publication_date': datetime.datetime.today().strftime('%Y-%m-%d')         
+        }
+    }
+    
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
+
+    file["Model Doi"] = Doi
+    del file['Existing Model Doi']
+
+    '''    Create enriched metadata file    '''
+    newmetadataname = metadata_name.split('.')[0] + '.V%s' + '.json' %(version)
+
+    with open(newmetadataname,'w') as metadata:
+        json.dump(file,metadata,indent=2)
+
+    
+    '''    Upload to Github Repository    '''
+
+    f= open(metadata_name).read()
+    GitHub_filename = 'Metadata/' + newmetadataname
+    myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
+
+    if r.status_code == 200:
+        print('Now you can go to Zenodo to see your draft at Doi: %s, make some changes, and be ready to publish your model.'%colored(Doi, 'magenta'))
+        publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
+                                    colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+        if publish_command == 'Yes':
+            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
+                              params=params,
+                              headers=headers)
+            if r.status_code > 400:
+                print(colored("Publishing model with Zenodo Failed!", "red"))
+                print("Status Code: {}".format(r.status_code))
+                raise Exception
+            print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
+            print('You can  access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
+            print('\n\n')
+        else:
+            print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
+    else:
+        print("Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
+
+def newversion_all(all_models):
+
+    '''    Check if  Zenodo token works    '''
+    Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
+    params = {'access_token': Zenodo_Access_Token}
+    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    if r.status_code > 400:
+        raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
+    print("Validating Zenodo access token: " + colored("PASSED!", "green"))
+    
+
+    '''    Check if Github token works    '''
+    Github_Access_Token = getpass('Please enter you Github access token:')
+    try:
+        g = Github(Github_Access_Token)
+        github_user = g.get_user()
+        # Get the public repo
+        repo = g.get_repo('ThanosWang/PracticeRepo')
+    except:
+        raise Exception(colored("Github access token cannot be validated", "red"))
+
+    print("Validating Github access token: " + colored("PASSED!", "green"))
+
+    
+    '''    Check if user's metadata repo is in sync with upstream    '''
+    # Create a fork in user's github
+    myfork = github_user.create_fork(repo)
+
+    # Check if the fork is up to date with main
+    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+        print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
+        print(colored("Please retry after syncing your local fork with upstream", "yellow"))
+        raise Exception
+
+    # Now put all models in zenodo and put their metadata in the local fork of metadata repo
+    base_path = os.getcwd()
+    for _path in all_models:
+        print("\nChecking Model: " + colored(_path, "magenta") + "\n")
+        os.chdir(_path)
+        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params)
+        os.chdir(base_path)
+
+    # Pull Request from forked branch to original
+    username = g.get_user().login
+    body = 'Upload metadata for new model(s)'
+    pr = repo.create_pull(title="Upload metadata for a model's new version", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
+    print('''
+    You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
+    Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
+    )
+
+
+
+def githubupload(model_path, myfork):
+    '''    Check for necessary files and their formats    '''
+    original_file = os.listdir(model_path)
+
+    assert 'metadata.json' in original_file, \
+        'Check if initial "metadata.json" exists: ' + colored('FAILED!', 'red')
+    try:
+        metadata = open('metadata.json')
+        file = json.load(metadata)
+    except:
+        raise Exception(colored('Check if initial "metadata.json" is correctly formatted: ') + colored('FAILED!', 'red'))
+    print('Check if initial "metadata.json" exists and correctly formatted: ' + colored('PASSED!', 'green'))
+
+    '''    Check existing model DOI    '''
+    try:
+        assert file['Model Doi']
+    except:
+        raise Exception(colored('"Existing Model Doi" field does not exist in metadata', 'red'))
+    
+    try:
+        assert 'zenodo' in file['Model Doi']
+    except:
+        raise Exception(colored('We suggest you to upload your model to Zenodo', 'red'))
+
+    Model_Doi = file['Model Doi']
+
+    '''    Generate the metadata for the model   '''
+    file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
+    file['Model Doi'] = Model_Doi
+
+    with open(metadata_name,'w') as metadata:
+        json.dump(file,metadata,indent=2)
+
+
+    '''    Upload to Github Repository    '''
+
+
+    # Create new metadata file in the forked repo
+    f= open(metadata_name).read()
+    GitHub_filename = 'Metadata/' + metadata_name
+    myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
+
+
+def githubupload_all(all_models):
+
+    '''    Check if Github token works    '''
+    Github_Access_Token = getpass('Please enter you Github access token:')
+    try:
+        g = Github(Github_Access_Token)
+        github_user = g.get_user()
+        # Get the public repo
+        repo = g.get_repo('ThanosWang/PracticeRepo')
+    except:
+        raise Exception(colored("Github access token cannot be validated", "red"))
+
+    print("Validating Github access token: " + colored("PASSED!", "green"))
+
+    
+    '''    Check if user's metadata repo is in sync with upstream    '''
+    # Create a fork in user's github
+    myfork = github_user.create_fork(repo)
+
+    # Check if the fork is up to date with main
+    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+        print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
+        print(colored("Please retry after syncing your local fork with upstream", "yellow"))
+        raise Exception
+
+    # Now put all models in zenodo and put their metadata in the local fork of metadata repo
+    base_path = os.getcwd()
+    for _path in all_models:
+        print("\nChecking Model: " + colored(_path, "magenta") + "\n")
+        os.chdir(_path)
+        githubupload(model_path = os.getcwd(), myfork = myfork)
+        os.chdir(base_path)
+
+    # Pull Request from forked branch to original
+    username = g.get_user().login
+    body = 'Upload metadata for new model(s)'
+    pr = repo.create_pull(title="Upload metadata for a new model", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
+    print('''
+    You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
+    Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
+    )
+
+
+
 if __name__ == '__main__':
     FUNCTION_MAP = {'Validation Check' : validator_all,
                     'Generate metadata' : metadatamaker_all,
-                    'Upload model': uploader_all}
+                    'Upload model': uploader_all,
+                    'Update new version' : newversion_all,
+                    'Upload metadata to GitHub': githubupload_all}
 
     parser = argparse.ArgumentParser()
     parser.add_argument('command', choices=FUNCTION_MAP.keys())

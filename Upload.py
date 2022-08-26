@@ -571,7 +571,7 @@ def uploader(model_path, myfork, params):
                 print("Status Code: {}".format(r.status_code))
                 raise Exception
             print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
-            print('You can  access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
+            print('You can access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
             print('\n\n')
         else:
             print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
@@ -675,8 +675,6 @@ def updatenewversion(model_path, myfork, params):
     for i in r.json():
         if i['metadata']['doi'] == file['Existing Model Doi']:
             old_deposition_id = i['id']
-    if len(old_deposition_id) == 0:
-        raise Exception("Your provided Model Doi does not exist in your Zenodo account.")
     
     '''    Work on new version    '''
     # Create new version draft
@@ -687,11 +685,11 @@ def updatenewversion(model_path, myfork, params):
     filenames = []
     for i in r.json()['files']:
         filelist[i['filename']] = i['id']
-        filenames.append(i['filenames'])
+        filenames.append(i['filename'])
 
     print('Your previous upload contains %s, do you want to delete them?' %(str(filenames)))
 
-    deletelist = raw_input('Please enter file names you want to delete in your new version,separated names with comma,or Enter No:').split(',')
+    deletelist = raw_input('Please enter file names you want to delete in your new version(inside u''),separated names with comma,or Enter No:').split(',')
 
     # Get new deposition id
     new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
@@ -738,16 +736,21 @@ def updatenewversion(model_path, myfork, params):
         else:
             Author_Information.append({"name": i['name']})
 
-    version = raw_input('Please enter your model version')
+    
     data = { 'metadata' : {
             'title': modelname,
             'upload_type': 'dataset',
             'description': file['Description'],
             'creators': Author_Information,
-            'version': version,
+            'version': file['Model Version'],
             'publication_date': datetime.datetime.today().strftime('%Y-%m-%d')         
         }
     }
+
+    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+                     params=params,
+                     data=json.dumps(data),
+                     headers=headers)
     
     if r.status_code > 400:
         print(colored("Creating deposition entry with Zenodo Failed!", "red"))
@@ -758,7 +761,7 @@ def updatenewversion(model_path, myfork, params):
     del file['Existing Model Doi']
 
     '''    Create enriched metadata file    '''
-    newmetadataname = metadata_name.split('.')[0] + '.V%s' + '.json' %(version)
+    newmetadataname = metadata_name.split('.')[0] + '.V' + file['Model Version'] + '.json' 
 
     with open(newmetadataname,'w') as metadata:
         json.dump(file,metadata,indent=2)
@@ -766,7 +769,7 @@ def updatenewversion(model_path, myfork, params):
     
     '''    Upload to Github Repository    '''
 
-    f= open(metadata_name).read()
+    f= open(newmetadataname).read()
     GitHub_filename = 'Metadata/' + newmetadataname
     myfork.create_file(GitHub_filename, 'Upload metadata for model: {}'.format(metadata_name.replace('.json', '')), f, branch='main')
 
@@ -783,7 +786,7 @@ def updatenewversion(model_path, myfork, params):
                 print("Status Code: {}".format(r.status_code))
                 raise Exception
             print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
-            print('You can  access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
+            print('You can access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
             print('\n\n')
         else:
             print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))

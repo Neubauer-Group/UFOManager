@@ -127,8 +127,8 @@ def validator(model_path):
     
     if True:     
         sys.path.append(model_path)
-        modelpath = model_path + '/ModelFolder'
-        sys.path.insert(0,modelpath)
+        modelloc = model_path + '/ModelFolder'
+        sys.path.insert(0,modelloc)
         if sys.version_info.major == 3:
             try:
                 UFOModel = importlib.import_module('ModelFolder')
@@ -176,7 +176,6 @@ def validator(model_path):
                 os.chdir(model_path)
                 shutil.rmtree('ModelFolder')
                 raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
-
         os.chdir('ModelFolder')
 
     print("Check for module imported as a python package: " + colored("PASSED!", "green"))
@@ -207,9 +206,6 @@ def validator(model_path):
 
     '''    Check individual files within the model    '''
     
-    model_folder_path = os.getcwd()
-    sys.path.insert(0,model_folder_path)
-
     # Check on model-independent files
     try:
         import object_library
@@ -412,17 +408,23 @@ def validator(model_path):
         if len(decay) == 0:
             raise Exception('There should be decays defined in "decays.py"')
         else:
-            print('Check if model contains well behaved "decayss.py": ' + colored("PASSED!", 'green'))
-            print('The model contains %i propagators' %(number_of_decays))
+            print('Check if model contains well behaved "decays.py": ' + colored("PASSED!", 'green'))
+            print('The model contains %i decays' %(number_of_decays))
         del sys.modules['decays']
     except ImportError:
         number_of_decays = 0
         pass
 
     # Finish the validation checking
-    sys.path.remove(model_folder_path)
     os.chdir(model_path)
     shutil.rmtree('ModelFolder')
+    sys.path.remove(model_path)
+    sys.path.remove(modelloc)
+    for f in [f for f in sys.modules.keys() if 'ModelFolder' in f]:
+        del sys.modules[f]
+    for f in ['particles', 'parameters', 'vertices', 'coupling_orders', 'couplings', 'lorentz', 'propagators', 'decays']:
+        if f in sys.modules.keys():
+            del sys.modules[f]        
 
     return file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays
 
@@ -481,8 +483,6 @@ def metadatamaker_all(all_models):
         os.chdir(_path)
         _ = metadatamaker(model_path = os.getcwd())
         os.chdir(base_path)
-
-
 
 
 def uploader(model_path, myfork, params):

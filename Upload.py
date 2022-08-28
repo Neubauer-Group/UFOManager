@@ -566,9 +566,9 @@ def uploader(model_path, myfork, params):
         if publish_command == 'Yes':
             r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                               params=params)
-            if r.status_code > 400:
+            if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
-                print("Status Code: {}".format(r.status_code))
+                print(r.json())
                 raise Exception
             print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
             print('You can access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
@@ -779,14 +779,13 @@ def updatenewversion(model_path, myfork, params):
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
             r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
-                              params=params,
-                              headers=headers)
-            if r.status_code > 400:
+                              params=params)
+            if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
-                print("Status Code: {}".format(r.status_code))
+                print(r.json())
                 raise Exception
             print('Your model has been successfully uploaded to Zenodo with DOI: %s' %(Doi))
-            print('You can access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
+            print('You can access your model in Zenodo at: {}'.format(r.json()["links"]["record_html"]))
             print('\n\n')
         else:
             print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))

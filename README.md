@@ -76,8 +76,8 @@ For metadata.json, basic information is required. You can see the requirements i
 Note: For arthuor information in metadata.json, affiliation and contact are optional, but at least one contact is needed.
 
 ## Usage
-After everything being set up, you can download Upload.py, put it in your current working directory and execute it. The Upload.py provides developers with 3 choices:
-'Validation Check', 'Generate metadata', and 'Upload model'. 
+After everything being set up, you can download Upload.py, put it in your current working directory and execute it. The Upload.py provides developers with 5 choices:
+'Validation Check', 'Generate metadata', 'Upload model', 'Update new version', and 'Upload metadata to GitHub'. 
 
 The Upload.py can deal with multiple models in single execution. Developers need to prepare a .txt file containing paths to their models, each path lies in a single line, for example, in the .txt file
 ```
@@ -148,8 +148,6 @@ Then, the Upload.py will generate a new enriched metadata file. This time, only 
 ```
 $ Please enter your model version: Your model version
 ```
-#### Version issue
-In Zenodo, create a new version of file in current upload will generate a new DOI for the file. Therefore, for new version of your existing model, you can just re-run the Upload.py to create a new Zenodo upload and get a new Zenodo DOI. Just the model version and your model compressed folder name need to be different from your existing model.
 
 Then, a new metadata file will be created in Your_Model_Folder.  
 ```
@@ -173,6 +171,101 @@ $ Do you want to publish your model and send your new enriched metadata file to 
 If you choose Yes, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A auto check will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact thanoswang@163.com.
 
 If you choose No, You can publish your model by yourself and create pull request by yourself. or send your enriched metadata file to thanoswang@163.com.
+
+### Update new version
+If you previously uploaded your model to Zenodo and want to update a new version of your model, use
+```
+$ python2/3 Upload.py 'Update new version'
+```
+And you need to add a new key-value pair
+```
+"Existing Model Doi": "Zenodo DOI from your model's latest version"
+'''
+in metadata.json.
+
+Then, the Upload.py will work in a similar way with 'Upload model'.
+
+At the beginning, your Zenodo personal access token and your GitHub personal access token will be required. The input uses getpass() to ensure the safety.
+```
+$ Please enter your Zenodo access token: Your Zenodo personal access token
+$ Please enter you Github access token: Your Github personal access token 
+```
+For your Zenodo personla access token, deposit:actions and desposit:write should be allowed.
+
+Then, the Upload.py will go through the validation check of your model, output necessary model-related information.
+
+After the validation check, the Upload.py will use [Zenodo API](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
+
+During the upload, your need to name your model/give title of your upload. Other neccessary information,creators and description, will be directly from your metadata.json.
+```bash
+$ Please name your model: Your model name
+```
+If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
+
+Then, the Upload.py will generate a new enriched metadata file. This time, only the model version is required.
+```
+$ Please enter your model version: Your model version
+```
+
+Then, a new metadata file will be created in Your_Model_Folder.  
+```
+--Your_Model_Folder
+ --metadata.json
+ --Your_Model_versionX.zip/.tgz/.tar.gz
+ --Your_Model_versionX.json
+```
+You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
+
+After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added.
+
+Before finally publish your model and upload new enriched metadata to GitHub, you can make some changes to your Zenodo draft. 
+
+Note: If you folked [UFOMetadata](https://github.com/ThanosWang/UFOMetadata) before, make sure that your forked branch is up-to-date with orginal one.
+
+And you can choose whether to continue
+```
+$ Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No: Yes, or No
+```
+If you choose Yes, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A auto check will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact thanoswang@163.com.
+
+If you choose No, You can publish your model by yourself and create pull request by yourself. or send your enriched metadata file to thanoswang@163.com.
+
+### Upload metadata to GitHub
+If you previously uploaded your model to Zenodo and want to create an enriched metadata for your model and upload metadata to GitHub, use 
+```
+$ python2/3 Upload.py 'Upload metadata to GitHub'
+```
+And you need to add a key-value pair
+```
+"Model Doi": "Zenodo DOI of your model"
+```
+in metadata.json.
+
+Then, your GitHub personal access token will be required. The input uses getpass() to ensure the safety.
+```
+$ Please enter you Github access token: Your Github personal access token 
+```
+Then, the Upload.py will go through the validation check of your model, output necessary model-related information.
+
+After that, the Upload.py will generate a new enriched metadata file, and following information will be asked
+```bash
+$ Please name your model: Your model name
+```
+
+```
+$ Please enter your model version: Your model version
+```
+
+Then, a new metadata file will be created in Your_Model_Folder.  
+```
+--Your_Model_Folder
+ --metadata.json
+ --Your_Model_versionX.zip/.tgz/.tar.gz
+ --Your_Model_versionX.json
+```
+You can see an [example enriched metadata file](https://github.com/ThanosWang/UFOMetadata/blob/main/metadata.json) stored in [UFOMetadata](https://github.com/ThanosWang/UFOMetadata).
+
+After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
 
 # Download
 Users can use Download.py to search for UFO models through their metadata preserved in [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) and download them from Zenodo.

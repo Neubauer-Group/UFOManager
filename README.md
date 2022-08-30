@@ -142,12 +142,10 @@ During the upload, your need to name your model/give title of your upload. Other
 ```bash
 $ Please name your model: Your model name
 ```
-If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
-
-Then, the Upload.py will generate a new enriched metadata file. This time, only the model version is required.
 ```
 $ Please enter your model version: Your model version
 ```
+If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
 
 Then, a new metadata file will be created in Your_Model_Folder.  
 ```
@@ -200,12 +198,10 @@ During the upload, your need to name your model/give title of your upload. Other
 ```bash
 $ Please name your model: Your model name
 ```
-If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
-
-Then, the Upload.py will generate a new enriched metadata file. This time, only the model version is required.
 ```
 $ Please enter your model version: Your model version
 ```
+If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created.
 
 Then, a new metadata file will be created in Your_Model_Folder.  
 ```

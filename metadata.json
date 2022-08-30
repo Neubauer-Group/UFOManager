@@ -13,6 +13,8 @@
         "arXiv" : "arXiv Identifier",
         "comment (Don't need to include)": "At least one of doi or arXiv identifier must be given"
     },
-    "Description": "Write your description of your model here."
+    "Description": "Write your description of your model here."，
+    "Existing Model Doi(if you are using 'Update new version')": "Zenodo DOI from the latest version of your model",
+    "Model Doi(if you are using 'Upload metadata to GitHub')": "Zenodo DOI of your model"
 }
 

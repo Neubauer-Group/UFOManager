@@ -263,6 +263,10 @@ You can see an [example enriched metadata file](https://github.com/ThanosWang/UF
 
 After that, the [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added, and pull request will be made.
 
+
+### Handle with errors
+You will be given feedback when most errors happen. If error happens when you are uploading your model to Zenodo or uploading metadata to GitHub, you need to delete the draft in Zenodo and new created metadata in your forked branch before re-running the Upload.py
+
 # Download
 Users can use Download.py to search for UFO models through their metadata preserved in [UFO Models Preservation repository](https://github.com/ThanosWang/UFOMetadata) and download them from Zenodo.
 ## Environment Build

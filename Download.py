@@ -21,17 +21,12 @@ import argparse
   url     = {https://doi.org/10.5281/zenodo.1261812}
 }'''
 
-Github_Access_Token = getpass('Please enter you Github access token:')
-
-api_path = os.getcwd()
 
 def AccessGitRepo(Github_Access_Token):
     # Connect to Github Repository
 
     g = Github(Github_Access_Token)
-
     repo = g.get_repo("ThanosWang/UFOMetadata")
-
     Allmetadata = repo.get_contents('Metadata')
 
     # Create a temporary folder for metadata
@@ -51,8 +46,6 @@ def AccessGitRepo(Github_Access_Token):
         metadata = requests.get(url)
         open(name,'wb').write(metadata.content)
     
-
-
 
 def Search(Github_Access_Token):
     global api_path
@@ -99,20 +92,24 @@ def Search(Github_Access_Token):
                 if 'Existing Model Doi' in _metadatafile:
                     current_working_doi = _metadatafile['Existing Model Doi']
                     for file in os.listdir('.'):
+                        if file in all_version_list:
+                            continue
                         with open(file,encoding='utf-8') as metadata:
                             metadatafile = json.load(metadata)
-                        if current_working_doi == metadatafile['Model Doi']:
-                            all_version_list.append(file)
-                        if 'Existing Model Doi' in metadatafile and current_working_doi == metadatafile['Existing Model Doi']:
-                            all_version_list.append(file)
-                if 'Model Doi' in _metadatafile:
-                    current_working_doi = _metadatafile['Model Doi']
-                    for file in os.listdir('.'):
-                        with open(file,encoding='utf-8') as metadata:
-                            metadatafile = json.load(metadata)
-                        if 'Existing Model Doi' in metadatafile and current_working_doi == metadatafile['Existing Model Doi']:
-                            all_version_list.append(file)
-                                            
+                        if 'Existing Model Doi' in metadatafile:
+                            if metadatafile['Existing Model Doi'] == current_working_doi:
+                                all_version_list.append(file)
+                            continue
+                        this_doi = metadatafile['Model Doi']
+                        r = requests.get("https://doi.org/" + this_doi)
+                        for line in r.iter_lines():
+                            line = str(line)
+                            if 'Cite all versions' not in line:
+                                continue
+                            conceptdoi = line.split("https://doi.org")[1].split('</a>')[0].split('">')[1]
+                            break
+                        if current_working_doi == conceptdoi:
+                            all_version_list.append(file)                                            
                 print('Based on your input Model Doi, we found your target model and its related versions %s' %(str(all_version_list)))
             else:
                 print('There is no model associated with the Model Doi %s you are looking for.' %(Model_Doi)) 
@@ -207,18 +204,19 @@ def Delete():
     os.chdir(api_path)
     shutil.rmtree('MetadatafilesTemporaryFolder')
 
-FUNCTION_MAP = {'Search for model' : Search,
+
+if __name__ == '__main__':
+    FUNCTION_MAP = {'Search for model' : Search,
                 'Download model' : Download,
                 'Search and Download': Search_Download}
 
-parser = argparse.ArgumentParser()
-parser.add_argument('command', choices=FUNCTION_MAP.keys())
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', choices=FUNCTION_MAP.keys())
+    args = parser.parse_args()
+    RunFunction = FUNCTION_MAP[args.command]
 
-args = parser.parse_args()
-
-RunFunction = FUNCTION_MAP[args.command]
-
-if __name__ == '__main__':
+    Github_Access_Token = getpass('Please enter you Github access token:')
+    api_path = os.getcwd()
     AccessGitRepo(Github_Access_Token=Github_Access_Token)
     RunFunction(Github_Access_Token=Github_Access_Token)
     Delete()

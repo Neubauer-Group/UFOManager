@@ -468,7 +468,7 @@ def metadatamaker(model_path, create_file = True):
     file.update(newcontent)
     meta_name = filename.split('.')[0]
     if not meta_name:
-        raise Exception("Invalid filename: '{}', please cheack".format(filename))
+        raise Exception("Invalid filename: '{}', please check".format(filename))
     metadata_name =  meta_name + '.json'
     if create_file:
         with open(metadata_name,'w') as metadata:

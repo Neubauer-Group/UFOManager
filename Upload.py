@@ -669,6 +669,8 @@ def updatenewversion(model_path, myfork, params):
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
     
+    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
+    
     '''    Find corresponding old version    '''
     old_deposition_id = ''
     upload_code = 0

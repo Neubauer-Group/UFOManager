@@ -66,6 +66,8 @@ def validator(model_path):
         assert file['Paper_id']
     except:
         raise Exception(colored('"Paper_id" field does not exist in metadata', 'red'))
+    assert file['Paper_id']['doi'] or file['Paper_id']['arXiv'], \
+        Exception(colored('"Paper_id" field does not contain doi or arXiv ID', 'red'))
     if 'doi' in file['Paper_id']:
         url = 'https://doi.org/' + file['Paper_id']['doi']
         doi_webpage = requests.get(url)
@@ -117,7 +119,7 @@ def validator(model_path):
             raise Exception(colored('"__init__.py" not available within model, not a Python Package!', 'red'))
         for _file in os.listdir('ModelFolder/' + ModelFolder_Files[0]):
             if _file == "__pycache__" or _file.endswith(".pyc") or _file.endswith("~"):
-                shutil.rmtree('ModelFolder/' + ModelFolder_Files[0] + '/__pycache__')
+                shutil.rmtree('ModelFolder/' + ModelFolder_Files[0] + '/' + _file)
                 continue
             shutil.copy('ModelFolder/' + ModelFolder_Files[0] + '/' +  _file, 'ModelFolder/' +  _file)
         shutil.rmtree('ModelFolder/' + ModelFolder_Files[0])
@@ -125,58 +127,57 @@ def validator(model_path):
 
     '''    Check if the model can be loaded as a python package    '''
     
-    if True:     
-        sys.path.append(model_path)
-        modelloc = model_path + '/ModelFolder'
-        sys.path.insert(0,modelloc)
-        if sys.version_info.major == 3:
-            try:
-                UFOModel = importlib.import_module('ModelFolder')
-            except SyntaxError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
-                                        'red'))
-            except ModuleNotFoundError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('The model may be missing some files, please check again', 'red'))
-            except AttributeError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
-            except NameError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
-            except TypeError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
-        else:
-            try:
-                UFOModel = importlib.import_module('ModelFolder')
-            except SyntaxError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception('Your model may have invalid syntaxes, please check again')
-            except ImportError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('The model may be missing some files, please check again', 'red'))
-            except AttributeError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
-            except NameError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
-            except TypeError:
-                os.chdir(model_path)
-                shutil.rmtree('ModelFolder')
-                raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
-        os.chdir('ModelFolder')
+    sys.path.append(model_path)
+    modelloc = model_path + '/ModelFolder'
+    sys.path.insert(0,modelloc)
+    if sys.version_info.major == 3:
+        try:
+            UFOModel = importlib.import_module('ModelFolder')
+        except SyntaxError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
+                                    'red'))
+        except ModuleNotFoundError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be missing some files, please check again', 'red'))
+        except AttributeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+        except NameError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+        except TypeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+    else:
+        try:
+            UFOModel = importlib.import_module('ModelFolder')
+        except SyntaxError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception('Your model may have invalid syntaxes, please check again')
+        except ImportError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be missing some files, please check again', 'red'))
+        except AttributeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+        except NameError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+        except TypeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+    os.chdir('ModelFolder')
 
     print("Check for module imported as a python package: " + colored("PASSED!", "green"))
 
@@ -445,8 +446,10 @@ def metadatamaker(model_path, create_file = True):
     modelname = raw_input('Please name your model:')
     modelversion = raw_input('Please enter your model version:')
     Doi = "0"
-    if create_file:
-        Doi = raw_input('Please enter your Model Doi, enter 0 if not have one:')
+    # if create_file or "Model Doi" not in file.keys():
+    #    Doi = raw_input('Please enter your Model Doi, enter 0 if not have one:')
+    if  "Model Doi" in file.keys():
+        Doi = file["Model Doi"]
     newcontent = {'Model name' : modelname,
                 'Model Doi' : Doi,
                 'Model Version' : modelversion,
@@ -484,7 +487,14 @@ def metadatamaker_all(all_models):
         _ = metadatamaker(model_path = os.getcwd())
         os.chdir(base_path)
 
+def is_parent(child, parent):
+    if not child.parents:
+        return False
+    if child.sha == parent.sha:
+        return True
+    return is_parent(child.parents[0], parent)
 
+        
 def uploader(model_path, myfork, params):
     
     '''    Generate the metadata for the model   '''
@@ -608,7 +618,7 @@ def uploader_all(all_models):
     myfork = github_user.create_fork(repo)
 
     # Check if the fork is up to date with main
-    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+    if not is_parent(myfork.get_branch('main').commit,  repo.get_branch('main').commit): 
         print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
         print(colored("Please retry after syncing your local fork with upstream", "yellow"))
         raise Exception
@@ -632,7 +642,7 @@ def uploader_all(all_models):
     )
 
 
-def updatenewversion(model_path, myfork, params):
+def updatenewversion(model_path, myfork, params, depositions):
 
     '''    Check for necessary files and their formats    '''
     original_file = os.listdir(model_path)
@@ -669,41 +679,53 @@ def updatenewversion(model_path, myfork, params):
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
     
-    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
-    
-    '''    Find corresponding old version    '''
-    old_deposition_id = ''
-    upload_code = 0
-    for i in r.json():
-        if i['metadata']['doi'] == file['Existing Model Doi']:
-            old_deposition_id = i['id']
-    
-    '''    Work on new version    '''
-    # Create new version draft
-    r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/newversion' %(old_deposition_id),params=params)
-    
-    # Get correspond files in provided old version
-    filelist = {}
+    '''    Find corresponding old version from the concept DOI    '''
     filenames = []
-    for i in r.json()['files']:
-        filelist[i['filename']] = i['id']
-        filenames.append(i['filename'])
+    found_entry = False
+    entry = None
+    for _entry in depositions:
+        if _entry['conceptdoi'].strip().split('.')[-1] == file['Existing Model Doi'].strip().split('.')[-1]:
+            found_entry = True
+            entry = _entry
 
-    print('Your previous upload contains %s, do you want to delete them?' %(str(filenames)))
+    assert found_entry, colored('The zenodo entry corresponding to DOI: {} not found'.format(file['Existing Model Doi']), 'red')
 
-    deletelist = raw_input('Please enter file names you want to delete in your new version(inside u''),separated names with comma,or Enter No:').split(',')
+    old_deposition_id = entry['links']['latest'].strip().split('/')[-1]
+    _r = requests.get("https://zenodo.org/api/records/{}".format(old_deposition_id), params=params)
+    for _file in _r.json()['files']:
+        link = _file['links']['self'].strip()
+        fname = link.split('/')[-1]
+        filenames.append(fname)
+
+    print('Your previous upload contains the file(s): %s. Do you want to delete them?' %(colored(','.join(filenames), 'magenta')))
+
+    deletelist = raw_input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')
+
+
+    # Work with new version draft
+    '''    Request a  new version    '''
+    r = requests.post("https://zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
 
     # Get new deposition id
     new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
-
+    
     if deletelist[0] != 'No':
-        for i in deletelist:
-            r = requests.delete('https://zenodo.org/api/deposit/depositions/%s/files/%s'%(new_deposition_id,filelist[i]),
-                         params=params)
+        r = requests.get("https://zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
+        if r.status_code > 400:
+            print(colored("Could not fetch file details from latest version!", "red"))
+            print("Status Code: {}".format(r.status_code))
+            raise Exception
+        for _file in r.json():
+            if _file['filename'] in deletelist:
+                _link = _file['links']['self']
+                r = requests.delete(_link, params=params)
 
     headers = {"Content-Type": "application/json"}
-
-    # Work with new version draft
+    
     r = requests.get('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      json={},
                      params=params,
@@ -822,7 +844,7 @@ def newversion_all(all_models):
     myfork = github_user.create_fork(repo)
 
     # Check if the fork is up to date with main
-    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+    if not is_parent(myfork.get_branch('main').commit,  repo.get_branch('main').commit): 
         print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
         print(colored("Please retry after syncing your local fork with upstream", "yellow"))
         raise Exception
@@ -832,7 +854,7 @@ def newversion_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params)
+        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params, depositions = r.json())
         os.chdir(base_path)
 
     # Pull Request from forked branch to original
@@ -840,7 +862,7 @@ def newversion_all(all_models):
     body = 'Upload metadata for new model(s)'
     pr = repo.create_pull(title="Upload metadata for a model's new version", body=body, head='{}:{}'.format(username,'main'), base='{}'.format('main'))
     print('''
-    You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
+    You have successfully uploaded your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
     Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
     If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
     )
@@ -864,12 +886,13 @@ def githubupload(model_path, myfork):
     try:
         assert file['Model Doi']
     except:
-        raise Exception(colored('"Existing Model Doi" field does not exist in metadata', 'red'))
+        raise Exception(colored('"Model Doi" field does not exist in metadata', 'red'))
     
     try:
         assert 'zenodo' in file['Model Doi']
     except:
         raise Exception(colored('We suggest you to upload your model to Zenodo', 'red'))
+
 
     url = 'https://doi.org/' + file['Model Doi']
     existing_model_webpage = requests.get(url)
@@ -878,11 +901,9 @@ def githubupload(model_path, myfork):
     except:
         raise Exception(colored('We cannot find your model page with your provided existing model doi.', 'red'))
 
-    Model_Doi = file['Model Doi']
-
+    
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
-    file['Model Doi'] = Model_Doi
 
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)
@@ -917,7 +938,7 @@ def githubupload_all(all_models):
     myfork = github_user.create_fork(repo)
 
     # Check if the fork is up to date with main
-    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+    if not is_parent(myfork.get_branch('main').commit,  repo.get_branch('main').commit): 
         print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
         print(colored("Please retry after syncing your local fork with upstream", "yellow"))
         raise Exception

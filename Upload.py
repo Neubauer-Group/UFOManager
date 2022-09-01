@@ -667,6 +667,14 @@ def updatenewversion(model_path, myfork, params, depositions):
     except:
         raise Exception(colored('We suggest you to upload your model to Zenodo', 'red'))
 
+    url = 'https://doi.org/' + file['Existing Model Doi']
+    existing_model_webpage = requests.get(url)
+
+    try:
+        assert existing_model_webpage.status_code < 400
+    except:
+        raise Exception(colored('We cannot find your model page with your provided existing model doi.', 'red'))
+
 
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
@@ -774,7 +782,6 @@ def updatenewversion(model_path, myfork, params, depositions):
         raise Exception
 
     file["Model Doi"] = Doi
-    # del file['Existing Model Doi']
 
     '''    Create enriched metadata file    '''
     newmetadataname = metadata_name.split('.')[0] + '.V' + file['Model Version'] + '.json' 
@@ -879,18 +886,24 @@ def githubupload(model_path, myfork):
     try:
         assert file['Model Doi']
     except:
-        raise Exception(colored('"Existing Model Doi" field does not exist in metadata', 'red'))
+        raise Exception(colored('"Model Doi" field does not exist in metadata', 'red'))
     
     try:
         assert 'zenodo' in file['Model Doi']
     except:
         raise Exception(colored('We suggest you to upload your model to Zenodo', 'red'))
 
-    # Model_Doi = file['Model Doi']
 
+    url = 'https://doi.org/' + file['Model Doi']
+    existing_model_webpage = requests.get(url)
+    try:
+        assert existing_model_webpage.status_code < 400
+    except:
+        raise Exception(colored('We cannot find your model page with your provided existing model doi.', 'red'))
+
+    
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
-    # file['Model Doi'] = Model_Doi
 
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)

@@ -94,26 +94,25 @@ def Search(Github_Access_Token):
                     model_name = file
             if len(model_name) != 0:
                 all_version_list.append(model_name)
-                while True:
-                    basenumber = len(all_version_list)
-                    with open(model_name,encoding='utf-8') as metadata:
-                        _metadatafile = json.load(metadata)
-                    # Check if the target model has existing doi
-                    if _metadatafile['Existing Model Doi']:
-                        current_working_doi = _metadatafile['Existing Model Doi']
-                        for file in os.listdir('.'):
-                            with open(file,encoding='utf-8') as metadata:
-                                metadatafile = json.load(metadata)
-                            if current_working_doi == metadatafile['Model Doi']:
-                                model_name = file
-                                all_version_list.append(model_name)
-                    else:
-                        break
-                    # Check if the corresponding model for existing model doi exists
-                    if basenumber != len(all_version_list):
-                        pass
-                    else:
-                        break
+                with open(model_name,encoding='utf-8') as metadata:
+                    _metadatafile = json.load(metadata)
+                if 'Existing Model Doi' in _metadatafile:
+                    current_working_doi = _metadatafile['Existing Model Doi']
+                    for file in os.listdir('.'):
+                        with open(file,encoding='utf-8') as metadata:
+                            metadatafile = json.load(metadata)
+                        if current_working_doi == metadatafile['Model Doi']:
+                            all_version_list.append(file)
+                        if 'Existing Model Doi' in metadatafile and current_working_doi == metadatafile['Existing Model Doi']:
+                            all_version_list.append(file)
+                if 'Model Doi' in _metadatafile:
+                    current_working_doi = _metadatafile['Model Doi']
+                    for file in os.listdir('.'):
+                        with open(file,encoding='utf-8') as metadata:
+                            metadatafile = json.load(metadata)
+                        if 'Existing Model Doi' in metadatafile and current_working_doi == metadatafile['Existing Model Doi']:
+                            all_version_list.append(file)
+                                            
                 print('Based on your input Model Doi, we found your target model and its related versions %s' %(str(all_version_list)))
             else:
                 print('There is no model associated with the Model Doi %s you are looking for.' %(Model_Doi)) 

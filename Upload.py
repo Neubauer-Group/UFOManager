@@ -17,6 +17,14 @@ if sys.version_info.major == 3:
     raw_input = input
 regex = r'[^@]+@[^@]+\.[^@]+'
 
+def is_parent(child, parent):
+    if not child.parents:
+        return False
+    if child.sha == parent.sha:
+        return True
+    return is_parent(child.parents[0], parent)
+
+
 def validator(model_path):
 
     print("\nChecking Model: " + colored(model_path, "magenta") + "\n")
@@ -632,7 +640,7 @@ def uploader_all(all_models):
     )
 
 
-def updatenewversion(model_path, myfork, params):
+def updatenewversion(model_path, myfork, params, r):
 
     '''    Check for necessary files and their formats    '''
     original_file = os.listdir(model_path)
@@ -661,39 +669,53 @@ def updatenewversion(model_path, myfork, params):
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
     
-    '''    Find corresponding old version    '''
-    old_deposition_id = ''
-    upload_code = 0
-    for i in r.json():
-        if i['metadata']['doi'] == file['Existing Model Doi']:
-            old_deposition_id = i['id']
-    
-    '''    Work on new version    '''
-    # Create new version draft
-    r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/newversion' %(old_deposition_id),params=params)
-    
-    # Get correspond files in provided old version
-    filelist = {}
+    '''    Find corresponding old version from the concept DOI    '''
     filenames = []
-    for i in r.json()['files']:
-        filelist[i['filename']] = i['id']
-        filenames.append(i['filename'])
+    found_entry = False
+    entry = None
+    for _entry in r.json():
+        if _entry['conceptdoi'].strip().split('.')[-1] == file['Existing Model Doi'].strip().split('.')[-1]:
+            found_entry = True
+            entry = _entry
 
-    print('Your previous upload contains %s, do you want to delete them?' %(str(filenames)))
+    assert found_entry, colored('The zenodo entry corresponding to DOI: {} not found'.format(file['Existing Model Doi']), 'red')
 
-    deletelist = raw_input('Please enter file names you want to delete in your new version(inside u''),separated names with comma,or Enter No:').split(',')
+    old_deposition_id = entry['links']['latest'].strip().split('/')[-1]
+    _r = requests.get("https://zenodo.org/api/records/{}".format(old_deposition_id), params=params)
+    for _file in _r.json()['files']:
+        link = _file['links']['self'].strip()
+        fname = link.split('/')[-1]
+        filenames.append(fname)
+
+    print('Your previous upload contains %s, do you want to delete them?' %(','.join(filenames)))
+
+    deletelist = raw_input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')
+
+
+    # Work with new version draft
+    '''    Request a  new version    '''
+    r = requests.post("https://zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
+    if r.status_code > 400:
+        print(colored("Creating deposition entry with Zenodo Failed!", "red"))
+        print("Status Code: {}".format(r.status_code))
+        raise Exception
 
     # Get new deposition id
     new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
-
+    
     if deletelist[0] != 'No':
-        for i in deletelist:
-            r = requests.delete('https://zenodo.org/api/deposit/depositions/%s/files/%s'%(new_deposition_id,filelist[i]),
-                         params=params)
+        r = requests.get("https://zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
+        if r.status_code > 400:
+            print(colored("Could not fetch file details from latest version!", "red"))
+            print("Status Code: {}".format(r.status_code))
+            raise Exception
+        for _file in r.json():
+            if _file['filename'] in deletelist:
+                _link = _file['links']['self']
+                r = requests.delete(_link, params=params)
 
     headers = {"Content-Type": "application/json"}
-
-    # Work with new version draft
+    
     r = requests.get('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      json={},
                      params=params,
@@ -750,7 +772,7 @@ def updatenewversion(model_path, myfork, params):
         raise Exception
 
     file["Model Doi"] = Doi
-    del file['Existing Model Doi']
+    # del file['Existing Model Doi']
 
     '''    Create enriched metadata file    '''
     newmetadataname = metadata_name.split('.')[0] + '.V' + file['Model Version'] + '.json' 
@@ -813,7 +835,7 @@ def newversion_all(all_models):
     myfork = github_user.create_fork(repo)
 
     # Check if the fork is up to date with main
-    if repo.get_branch('main').commit.sha != myfork.get_branch('main').commit.sha:
+    if not is_parent(myfork.get_branch('main').commit,  repo.get_branch('main').commit): #.sha != myfork.get_branch('main').commit.sha:
         print(colored("Your fork of the UFOMetadata repo is out of sync from the upstream!", "red"))
         print(colored("Please retry after syncing your local fork with upstream", "yellow"))
         raise Exception
@@ -823,7 +845,7 @@ def newversion_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params)
+        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params, r = r)
         os.chdir(base_path)
 
     # Pull Request from forked branch to original

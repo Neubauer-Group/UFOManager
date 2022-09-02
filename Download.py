@@ -7,6 +7,8 @@ import json
 import zenodo_get
 from getpass import getpass
 import argparse
+from tabulate import tabulate
+from termcolor import colored
 # This python script utilizes zenodo_get package from David Völgyes 
 # David Völgyes. (2020, February 20). Zenodo_get: a downloader for Zenodo records (Version 1.3.4).
 # Zenodo. https://doi.org/10.5281/zenodo.1261812
@@ -45,7 +47,18 @@ def AccessGitRepo(Github_Access_Token):
         url += name
         metadata = requests.get(url)
         open(name,'wb').write(metadata.content)
+
+def Display(jsonlist):
+    display_data = []    
+    for file in jsonlist:
+        with open(file,encoding='utf-8') as metadata:
+            metadatafile = json.load(metadata)
+
+        information = [file,metadatafile['Model name'],metadatafile['Paper_id'],metadatafile['Description']]
+        display_data.append(information)
     
+    print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Description"]))
+        
 
 def Search(Github_Access_Token):
     global api_path
@@ -61,44 +74,50 @@ def Search(Github_Access_Token):
         if search_type == 'Paper_id':
             paper_id = input('Please enter your needed paper_id:')
             
-            required_feedback = ''
+            target_list = []
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
                     metadatafile = json.load(metadata)
                 paper_ids = [metadatafile['Paper_id'][i] for i in metadatafile['Paper_id']]
                 if paper_id in paper_ids:
-                    print('The metadata file %s has the paper_id %s you are looking for.' %(file,paper_id))
-                    required_feedback = file
+                    target_list.append(file)
             
-            if len(required_feedback) == 0:
-                print('There is no model associated with the paper_id %s you are looking for.' %(paper_id))
+            if len(target_list) == 0:
+                print('There is no model associated with the paper_id ' + colored(paper_id,'red') + ' you are looking for.')
+            else:
+                print('Based on your search, we find models below:')
+                Display(jsonlist=target_list)
         
         # Search for models with corresponding model Doi from Zenodo
         if search_type == 'Model Doi':
             Model_Doi = input('Please enter your needed Model doi:')
 
             model_name = ''
-            all_version_list = []
+            target_list = []
             current_working_doi = ''
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
                     metadatafile = json.load(metadata)
                 if Model_Doi == metadatafile['Model Doi']:
                     model_name = file
+                    break
+                if 'Existing Model Doi' in metadatafile and metadatafile['Existing Model Doi'] == Model_Doi:
+                    model_name = file
+                    break
             if len(model_name) != 0:
-                all_version_list.append(model_name)
+                target_list.append(model_name)
                 with open(model_name,encoding='utf-8') as metadata:
                     _metadatafile = json.load(metadata)
                 if 'Existing Model Doi' in _metadatafile:
                     current_working_doi = _metadatafile['Existing Model Doi']
                     for file in os.listdir('.'):
-                        if file in all_version_list:
+                        if file in target_list:
                             continue
                         with open(file,encoding='utf-8') as metadata:
                             metadatafile = json.load(metadata)
                         if 'Existing Model Doi' in metadatafile:
                             if metadatafile['Existing Model Doi'] == current_working_doi:
-                                all_version_list.append(file)
+                                target_list.append(file)
                             continue
                         this_doi = metadatafile['Model Doi']
                         r = requests.get("https://doi.org/" + this_doi)
@@ -109,10 +128,11 @@ def Search(Github_Access_Token):
                             conceptdoi = line.split("https://doi.org")[1].split('</a>')[0].split('">')[1]
                             break
                         if current_working_doi == conceptdoi:
-                            all_version_list.append(file)                                            
-                print('Based on your input Model Doi, we found your target model and its related versions %s' %(str(all_version_list)))
+                            target_list.append(file)
+                print('Based on your search, we find models below:')                                                        
+                Display(jsonlist=target_list)
             else:
-                print('There is no model associated with the Model Doi %s you are looking for.' %(Model_Doi)) 
+                print('There is no model associated with the Model Doi ' + colored(Model_Doi,'red') + ' you are looking for.') 
             
 
         
@@ -120,6 +140,7 @@ def Search(Github_Access_Token):
         if search_type == 'pdg code':
             pdg_code = input('Please enter your needed pdg code:').split(',')
             pdg_code_list = [int(i) for i in pdg_code]
+            target_list = []
 
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
@@ -130,13 +151,20 @@ def Search(Github_Access_Token):
                 if pdg_code_compare_result:
                     for i in metadatafile['All Particles']:
                         if metadatafile['All Particles'][i] in pdg_code_list:
-                            pdg_dict[i] = metadatafile['All Particles'][i]
-                    print('The metadata file %s has particles %s you are looking for.' %(file,str(pdg_dict)))
+                            target_list.append(file)
+                
+            if len(target_list) == 0:
+                print('There is no model containing all particle(s) with pdg code' + colored(pdg_code,'red') + ' you are looking for.')
+            else:
+                print('Based on your search, we find models below:')
+                Display(jsonlist=target_list)
+                    
         
         # Search for models with particles' names
         if search_type == 'name':
             particle_name_list = input('Please enter your needed particle name:').split(',')
             pdg_code_corresponding_list = []
+            target_list = []
 
             for file in os.listdir('.'):
                 with open(file,encoding='utf-8') as metadata:
@@ -156,8 +184,14 @@ def Search(Github_Access_Token):
                     if pdg_code_compare_result_from_particles:
                         for i in metadatafile['All Particles']:
                             if metadatafile['All Particles'][i] in pdg_code_corresponding_list:
-                                pdg_dict_from_particles[i] = metadatafile['All Particles'][i]
-                        print('The metadata file %s has particles %s you are looking for.' %(file,str(pdg_dict_from_particles)))
+                                target_list.append(file)
+            else:
+                print('There is no model containing all particle(s) ' + colored(particle_name_list,'red') + ' you are looking for.')
+
+            if len(target_list) != 0:
+                print('Based on your search, we find models below:')
+                Display(jsonlist=target_list)
+                                
 
         # Stop the loop and exit search part     
         if input('Do you still want to search for models? Please type in Yes or No.') == 'No':

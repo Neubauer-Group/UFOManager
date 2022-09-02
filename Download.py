@@ -53,8 +53,13 @@ def Display(jsonlist):
     for file in jsonlist:
         with open(file,encoding='utf-8') as metadata:
             metadatafile = json.load(metadata)
-
-        information = [file,metadatafile['Model name'],metadatafile['Paper_id'],metadatafile['Description']]
+        if 'arXiv' in metadatafile['Paper_id']:
+            information = [file,metadatafile['Model name'],{'arXiv' : metadatafile['Paper_id']['arXiv']},metadatafile['Description']]
+        else:
+            if 'doi.org' in metadatafile['Paper_id']['doi']:
+                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi'][16:]},metadatafile['Description']]
+            else:
+                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi']},metadatafile['Description']]
         display_data.append(information)
     
     print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Description"]))

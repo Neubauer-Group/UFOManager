@@ -284,7 +284,7 @@ to activate your envirenment.
 
 The Download.py utilizes [zenodo_get](https://github.com/dvolgyes/zenodo_get) from David Völgyes, detailed citation information is included in the python script.
 ```bash
-pip install requests, PyGithub, zenodo_get
+pip install requests, PyGithub, zenodo_get， termcolor
 ```
 ## Usage
 To use Download.py, just download it and put it anywhere you want and execute it. The Download.py allows 3 choices for users: simply search for models, simply download models, or do both. In each step, your github personal access token is needed, and getpass() is used as input to ensure safety.

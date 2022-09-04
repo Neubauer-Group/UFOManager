@@ -14,7 +14,7 @@
         "comment (Don't need to include)": "At least one of doi or arXiv identifier must be given"
     },
     "Description": "Write your description of your model here.",
-    "Existing Model Doi(if you are using 'Update new version')": "Zenodo DOI from the first version of your model",
+    "Existing Model Doi(if you are using 'Update new version')": "Zenodo-issued concept-DOI for your model",
     "Model Doi(if you are using 'Upload metadata to GitHub')": "Zenodo DOI of your model"
 }
 

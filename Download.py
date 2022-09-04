@@ -28,7 +28,7 @@ def AccessGitRepo(Github_Access_Token):
     # Connect to Github Repository
 
     g = Github(Github_Access_Token)
-    repo = g.get_repo("ThanosWang/UFOMetadata")
+    repo = g.get_repo("Neubauer-Group/UFOMetadata")
     Allmetadata = repo.get_contents('Metadata')
 
     # Create a temporary folder for metadata
@@ -43,7 +43,7 @@ def AccessGitRepo(Github_Access_Token):
     # Download all metadata files from GitHub Repository
     for i in Allmetadata:
         name = i.name
-        url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
+        url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
         url += name
         metadata = requests.get(url)
         open(name,'wb').write(metadata.content)

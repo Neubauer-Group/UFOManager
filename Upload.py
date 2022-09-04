@@ -606,7 +606,7 @@ def uploader_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -832,7 +832,7 @@ def newversion_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -926,7 +926,7 @@ def githubupload_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 

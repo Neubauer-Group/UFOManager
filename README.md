@@ -177,7 +177,7 @@ $ python2/3 Upload.py 'Update new version'
 ```
 And you need to add a new key-value pair
 ```
-"Existing Model Doi": "Zenodo DOI from your model's latest version"
+"Existing Model Doi": "Zenodo DOI from your model's first version"
 ```
 in metadata.json.
 

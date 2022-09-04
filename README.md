@@ -111,7 +111,6 @@ Then, the Upload.py will go through the validation check of your model and outpu
 ```
 $ Please name your model: Your model name
 $ Please enter your model version: Your model version
-$ Please enter your Model Doi, enter 0 if not have one: Your Model Doi
 ```
 After that, a new enriched metadata json file will be created in Your_Model_Folder. 
 ```
@@ -284,7 +283,7 @@ to activate your envirenment.
 
 The Download.py utilizes [zenodo_get](https://github.com/dvolgyes/zenodo_get) from David Völgyes, detailed citation information is included in the python script.
 ```bash
-pip install requests, PyGithub, zenodo_get， termcolor
+pip install requests PyGithub zenodo_get termcolor tabulate
 ```
 ## Usage
 To use Download.py, just download it and put it anywhere you want and execute it. The Download.py allows 3 choices for users: simply search for models, simply download models, or do both. In each step, your github personal access token is needed, and getpass() is used as input to ensure safety.

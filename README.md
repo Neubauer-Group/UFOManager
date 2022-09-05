@@ -69,7 +69,7 @@ or
     --object_library.py
     ...
 ```
-For metadata.json, some basic information is required. You can see the requirements in [example](https://github.com/Neubauer-Group/UFOModel_Upload_Download/blob/main/metadata.json). For author information in `metadata.json`, affiliation and contact are optional, but at least one contact is needed. It also requires a reference to an associated publication (either an [arxiv](https:://arxiv.org) Id or a `DOI`) that contains the necessary physics details and validation.
+For metadata.json, some basic information is required. You can see the requirements in [example](https://github.com/Neubauer-Group/UFOManager/blob/main/metadata.json). For author information in `metadata.json`, affiliation and contact are optional, but at least one contact is needed. It also requires a reference to an associated publication (either an [arxiv](https:://arxiv.org) Id or a `DOI`) that contains the necessary physics details and validation.
 
 ### Usage
 After everything being set up, you can download Upload.py, put it in your current working directory and execute it. The Upload.py provides developers with 5 choices:

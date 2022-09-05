@@ -148,7 +148,7 @@ Before finally publishing your model and uploading new enriched metadata to GitH
 ```
 $ Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No: Yes, or No
 ```
-If you choose `Yes`, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A CI-enabled autocheck will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact (Zijun Wang)[zijun4@illinois.edu] or (Avik Roy)[avroy@illinois.edu].
+If you choose `Yes`, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A CI-enabled autocheck will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact Zijun Wang [zijun4@illinois.edu] or Avik Roy [avroy@illinois.edu].
 
 If you choose `No`, you can publish your model by yourself. You can visit the associated Zenodo draft, edit it and publish. Afterwards, you can create the pull request to add your enriched metadata to [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) by yourself, or send your enriched metadata file to (Zijun Wang)[zijun4@illinois.edu] or (Avik Roy)[avroy@illinois.edu].
 

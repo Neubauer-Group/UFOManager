@@ -584,9 +584,9 @@ def uploader(model_path, myfork, params):
             print('You can access your model in Zenodo at: {}'.format(r.json()['links']['record_html']))
             print('\n\n')
         else:
-            print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
+            print("You can publish your model by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com/zijun4@illinois.edu", "blue"))
     else:
-        print("Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com", "blue"))
+        print("Your Zenodo upload Draft may have some problems. You can check your Draft on Zenodo and publish it by yourself. Then, please send your enriched metadata file to %s. I will help upload your metadata to GitHub Repository."%colored("thanoswang@163.com/zijun4@illinois.edu", "blue"))
 
 
 def uploader_all(all_models):
@@ -638,7 +638,7 @@ def uploader_all(all_models):
     print('''
     You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
     Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
-    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com/zijun4@illinois.edu' ,'blue')
     )
 
 
@@ -864,7 +864,7 @@ def newversion_all(all_models):
     print('''
     You have successfully uploaded your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
     Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
-    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com/zijun4@illinois.edu' ,'blue')
     )
 
 
@@ -958,7 +958,7 @@ def githubupload_all(all_models):
     print('''
     You have successfully upload your model(s) to Zenodo and created a pull request of your new enriched metadate files to GitHub repository''' + colored(' UFOMetadata', 'magenta') + '''. 
     Your pull request to UFOMetadata will be checked by GitHub's CI workflow.
-    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com' ,'blue')
+    If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com/zijun4@illinois.edu' ,'blue')
     )
 
 

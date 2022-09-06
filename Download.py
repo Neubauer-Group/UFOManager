@@ -154,9 +154,7 @@ def Search(Github_Access_Token):
                 pdg_dict = {}
                 pdg_code_compare_result = all(i in All_particles_pdg_code for i in pdg_code_list)
                 if pdg_code_compare_result:
-                    for i in metadatafile['All Particles']:
-                        if metadatafile['All Particles'][i] in pdg_code_list:
-                            target_list.append(file)
+                    target_list.append(file)
                 
             if len(target_list) == 0:
                 print('There is no model containing all particle(s) with pdg code' + colored(pdg_code,'red') + ' you are looking for.')
@@ -187,9 +185,7 @@ def Search(Github_Access_Token):
                     pdg_dict_from_particles = {}
                     pdg_code_compare_result_from_particles = all(i in All_particles_pdg_code for i in pdg_code_corresponding_list)
                     if pdg_code_compare_result_from_particles:
-                        for i in metadatafile['All Particles']:
-                            if metadatafile['All Particles'][i] in pdg_code_corresponding_list:
-                                target_list.append(file)
+                        target_list.append(file)
             else:
                 print('There is no model containing all particle(s) ' + colored(particle_name_list,'red') + ' you are looking for.')
 

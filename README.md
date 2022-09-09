@@ -216,7 +216,11 @@ Then, you can can start your search. For Paper_id and Model Doi, one input value
 $ Please enter your needed pdg code: code1,code2, ...
 $ Please enter your needed particle name: name1,name2, ...
 ```
-Then, you will get the feedback about which metadata files contain information matching you input. Also, you can restart the search.
+Note: Your input particles should not be all elementary particles!!!
+
+Then, you will get a feedback table containing metadata file name, model name, paper_id, and description of UFO models fit your search. 
+
+Also, you can restart the search.
 ```bash
 $ Do you still want to search for models? Please type in Yes or No. Yes or No
 ```

@@ -13,8 +13,6 @@ from termcolor import colored, cprint
 import re
 import datetime
 
-if sys.version_info.major == 3:
-    raw_input = input
 regex = r'[^@]+@[^@]+\.[^@]+'
 
 def validator(model_path):
@@ -130,53 +128,31 @@ def validator(model_path):
     sys.path.append(model_path)
     modelloc = model_path + '/ModelFolder'
     sys.path.insert(0,modelloc)
-    if sys.version_info.major == 3:
-        try:
-            UFOModel = importlib.import_module('ModelFolder')
-        except SyntaxError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
-                                    'red'))
-        except ModuleNotFoundError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('The model may be missing some files, please check again', 'red'))
-        except AttributeError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
-        except NameError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
-        except TypeError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
-    else:
-        try:
-            UFOModel = importlib.import_module('ModelFolder')
-        except SyntaxError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception('Your model may have invalid syntaxes, please check again')
-        except ImportError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('The model may be missing some files, please check again', 'red'))
-        except AttributeError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
-        except NameError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
-        except TypeError:
-            os.chdir(model_path)
-            shutil.rmtree('ModelFolder')
-            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+
+    try:
+        UFOModel = importlib.import_module('ModelFolder')
+    except SyntaxError:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
+                                'red'))
+    except ModuleNotFoundError:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('The model may be missing some files, please check again', 'red'))
+    except AttributeError:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+    except NameError:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+    except TypeError:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+    
     os.chdir('ModelFolder')
 
     print("Check for module imported as a python package: " + colored("PASSED!", "green"))
@@ -443,11 +419,11 @@ def metadatamaker(model_path, create_file = True):
     file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays = validator(model_path)
     filename = [i for i in original_file if i != 'metadata.json'][0]
     print('\nWorking on model: ' + colored(model_path, "magenta") + "\n")
-    modelname = raw_input('Please name your model:')
-    modelversion = raw_input('Please enter your model version:')
+    modelname = input('Please name your model:')
+    modelversion = input('Please enter your model version:')
     Doi = "0"
     # if create_file or "Model Doi" not in file.keys():
-    #    Doi = raw_input('Please enter your Model Doi, enter 0 if not have one:')
+    #    Doi = input('Please enter your Model Doi, enter 0 if not have one:')
     if  "Model Doi" in file.keys():
         Doi = file["Model Doi"]
     newcontent = {'Model name' : modelname,
@@ -571,7 +547,7 @@ def uploader(model_path, myfork, params):
 
     if r.status_code == 200:
         print('Now you can go to Zenodo to see your draft at Doi: %s, make some changes, and be ready to publish your model.'%colored(Doi, 'magenta'))
-        publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
+        publish_command = input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
             r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
@@ -699,7 +675,7 @@ def updatenewversion(model_path, myfork, params, depositions):
 
     print('Your previous upload contains the file(s): %s. Do you want to delete them?' %(colored(','.join(filenames), 'magenta')))
 
-    deletelist = raw_input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')
+    deletelist = input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')
 
 
     # Work with new version draft
@@ -798,7 +774,7 @@ def updatenewversion(model_path, myfork, params, depositions):
 
     if r.status_code == 200:
         print('Now you can go to Zenodo to see your draft at Doi: %s, make some changes, and be ready to publish your model.'%colored(Doi, 'magenta'))
-        publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
+        publish_command = input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
             r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
@@ -975,7 +951,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     RunFunction = FUNCTION_MAP[args.command]
 
-    TXT = raw_input('Please enter the path to a text file with the list of all UFO models:')
+    TXT = input('Please enter the path to a text file with the list of all UFO models:')
     with open(TXT) as f:
         all_models = [line.strip() for line in f.readlines() if not line.strip().startswith('#')]
     RunFunction(all_models = all_models)

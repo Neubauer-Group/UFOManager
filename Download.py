@@ -146,21 +146,26 @@ def Search(Github_Access_Token):
             pdg_code = input('Please enter your needed pdg code:').split(',')
             pdg_code_list = [int(i) for i in pdg_code]
             target_list = []
-
-            for file in os.listdir('.'):
-                with open(file,encoding='utf-8') as metadata:
-                    metadatafile = json.load(metadata)
-                All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
-                pdg_dict = {}
-                pdg_code_compare_result = all(i in All_particles_pdg_code for i in pdg_code_list)
-                if pdg_code_compare_result:
-                    target_list.append(file)
-                
-            if len(target_list) == 0:
-                print('There is no model containing all particle(s) with pdg code' + colored(pdg_code,'red') + ' you are looking for.')
+            elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
+            elementary_particle_compare = all(i in elementary_particles for i in pdg_code_list)
+            Feedback = 'All particles you are looking for are elementary particles which are contained by all models. Please try again with BSM particles.'
+            if elementary_particle_compare:
+                print(colored(Feedback,'red'))
             else:
-                print('Based on your search, we find models below:')
-                Display(jsonlist=target_list)
+                for file in os.listdir('.'):
+                    with open(file,encoding='utf-8') as metadata:
+                        metadatafile = json.load(metadata)
+                    All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
+                    pdg_dict = {}
+                    pdg_code_compare_result = all(i in All_particles_pdg_code for i in pdg_code_list)
+                    if pdg_code_compare_result:
+                        target_list.append(file)
+                    
+                if len(target_list) == 0:
+                    print('There is no model containing all particle(s) with pdg code' + colored(pdg_code,'red') + ' you are looking for.')
+                else:
+                    print('Based on your search, we find models below:')
+                    Display(jsonlist=target_list)
                     
         
         # Search for models with particles' names
@@ -178,14 +183,20 @@ def Search(Github_Access_Token):
                     pdg_code_corresponding_list = [metadatafile['All Particles'][i] for i in particle_name_list]
                     break
             if pdg_code_corresponding_list != []:
-                for file in os.listdir('.'):
-                    with open(file,encoding='utf-8') as metadata:
-                        metadatafile = json.load(metadata)
-                    All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
-                    pdg_dict_from_particles = {}
-                    pdg_code_compare_result_from_particles = all(i in All_particles_pdg_code for i in pdg_code_corresponding_list)
-                    if pdg_code_compare_result_from_particles:
-                        target_list.append(file)
+                elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
+                elementary_particle_compare = all(i in elementary_particles for i in pdg_code_corresponding_list)
+                Feedback = 'All particles you are looking for are elementary particles which are contained by all models. Please try again with BSM particles.'
+                if elementary_particle_compare:
+                    print(colored(Feedback,'red'))
+                else:
+                    for file in os.listdir('.'):
+                        with open(file,encoding='utf-8') as metadata:
+                            metadatafile = json.load(metadata)
+                        All_particles_pdg_code = [metadatafile['All Particles'][i] for i in metadatafile['All Particles']]
+                        pdg_dict_from_particles = {}
+                        pdg_code_compare_result_from_particles = all(i in All_particles_pdg_code for i in pdg_code_corresponding_list)
+                        if pdg_code_compare_result_from_particles:
+                            target_list.append(file)
             else:
                 print('There is no model containing all particle(s) ' + colored(particle_name_list,'red') + ' you are looking for.')
 

@@ -10,16 +10,16 @@ Further details about the content and format of UFO models can be found in the a
 Domain specific interpretation of FAIR principles in the context of different kinds of digital objetcs are being investigated by multiple groups. For instance, the [FAIR4HEP](https://fair4hep.github.io/) group focuses on identifying the best practices to make data and ML models FAIR in high energy physics. 
 
 # About this repository
-Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. This FAIR-principle guided repository has been developed as a comprehensive tool to automate the persistent preservation and dispersion of UFO models and their corresponding metadata, creating a reliable and persistent bridgeway between the developers and users of such models. The primary content of this repository are three python scripts: `Upload_Python2.py` and `Upload_Python3.py` for uploading UFO models and `Downlaod.py` for downloading UFO modelss.
+Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. This FAIR-principle guided repository has been developed as a comprehensive tool to automate the persistent preservation and dispersion of UFO models and their corresponding metadata, creating a reliable and persistent bridgeway between the developers and users of such models. The primary content of this repository are three python scripts: `Uploadv2.py` and `Uploadv3.py` for uploading UFO models and `Downlaod.py` for downloading UFO modelss.
 
 ## Model Validation, Metadata Generation, and Preservation
-Developers can use `Upload_Python2.py` or `Upload_Python3.py` to validate the structure and content as well as publish their models with persistent **D**igital **O**bject **I**dentifiers (DOIs). When provided with the model files and some basic model inforamtion, the Upload function can examine the validation of model files,  generate metadata in the formal of a `json` file for the model, publish the model to [Zenodo](https://zenodo.org/), and make the metadata available via another repository [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) for preservation.
+Developers can use `Uploadv2.py` or `Uploadv3.py` to validate the structure and content as well as publish their models with persistent **D**igital **O**bject **I**dentifiers (DOIs). When provided with the model files and some basic model inforamtion, the Upload function can examine the validation of model files,  generate metadata in the formal of a `json` file for the model, publish the model to [Zenodo](https://zenodo.org/), and make the metadata available via another repository [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) for preservation.
 
 ### Preparation
 You need to do a series of preparation work before being able to use the Upload function
 
 ### Environment Build
-A Python virtual environment is recommended for executing `Upload_Python2.py` or `Upload_Python3.py` in command line interface. Necessary Python packages need to be installed. The Python2 support is enabled since many of the existing UFO models have been developed in Python2 and still used as is or with conversion locally performed by Python version conversion tools provided as plug-ins with Monte Carlo Generator Softwares like MadGraph.
+A Python virtual environment is recommended for executing `Uploadv2.py` or `Uploadv3.py` in command line interface. Necessary Python packages need to be installed. The Python2 support is enabled since many of the existing UFO models have been developed in Python2 and still used as is or with conversion locally performed by Python version conversion tools provided as plug-ins with Monte Carlo Generator Softwares like MadGraph.
 
 **To run the script with Python3**, one needs to build a Python3 virtual environment. You can do it with
 ```bash
@@ -72,10 +72,10 @@ or
 For metadata.json, some basic information is required. You can see the requirements in [example](https://github.com/Neubauer-Group/UFOManager/blob/main/metadata.json). For author information in `metadata.json`, affiliation and contact are optional, but at least one contact is needed. It also requires a reference to an associated publication (either an [arxiv](https:://arxiv.org) Id or a `DOI`) that contains the necessary physics details and validation.
 
 ### Usage
-After everything being set up, you can download `Upload_Python2.py` or `Upload_Python3.py`, put it in your current working directory and execute it. The Upload function provides developers with 5 choices:
+After everything being set up, you can download `Uploadv2.py` or `Uploadv3.py`, put it in your current working directory and execute it. The Upload function provides developers with 5 choices:
 `'Validation Check', 'Generate metadata', 'Upload model', 'Update new version', and 'Upload metadata to GitHub'` 
 
-`Upload_Python2/3.py` can deal with multiple models in single execution. Developers need to prepare a `.txt` file containing paths to their models, each path lies in a single line, for example, in the `.txt` file
+`Uploadv2/3.py` can deal with multiple models in single execution. Developers need to prepare a `.txt` file containing paths to their models, each path lies in a single line, for example, in the `.txt` file
 ```
 path-to-model1
 path-to-model2
@@ -90,20 +90,20 @@ $ Please enter the path to a text file with the list of all UFO models: Path_to_
 #### Validation Check
 To check the validation of your model, use
 ```
-$ python2/3 Upload_Python2/3.py 'Validation Check'
+$ python2/3 Uploadv2/3.py 'Validation Check'
 ```
 in command line.
 
-Then, `Upload_Python2/3.py` will first check your file preparation, like whether your folder contains only two files required, and whether your metadata.json contains necessary information. After that,your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, `Upload_Python2/3.py` will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model.
+Then, `Uploadv2/3.py` will first check your file preparation, like whether your folder contains only two files required, and whether your metadata.json contains necessary information. After that,your model's validation will be checked. Your model will be checked whether it can be imported as a complete python package, since event generators require model input as a complete python package. After that, `Uploadv2/3.py` will read through your necessary model dependent files, check the completeness of those files and generate basic model-related information, such as particles defined in your model, number of vertices defined in your model.
 
 #### Generate metadata
 To generate new metadata of your model, use
 ```
-$ python2/3 Upload_Python2/3.py 'Generate metadata'
+$ python2/3 Uploadv2/3.py 'Generate metadata'
 ```
 in command line.
 
-Then, `Upload_Python2/3.py` will go through the validation check of your model and output necessary model-related information. Then, some information is required from developers:
+Then, `Uploadv2/3.py` will go through the validation check of your model and output necessary model-related information. Then, some information is required from developers:
 ```
 $ Please name your model: Your model name
 $ Please enter your model version: Your model version
@@ -122,7 +122,7 @@ You can see an [example enriched metadata file](https://github.com/Neubauer-Grou
 #### Upload model    
 To publish the model to Zenodo and push the metadata file to another repository [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) for preservation, use
 ```
-$ python2/3 Upload_Python2/3.py 'Upload model'
+$ python2/3 Uploadv2/3.py 'Upload model'
 ```
 At the beginning, your Zenodo personal access token and your GitHub personal access token will be required. These inputs use `getpass()` to ensure the safety.
 ```
@@ -131,7 +131,7 @@ $ Please enter you Github access token: Your Github personal access token
 ```
 For your Zenodo personal access token, `deposit:actions` and `desposit:write` should be allowed.
 
-Then, `Upload_Python2/3.py` will go through the validation check of your model, generate the enriched metadata, and then use the [`Zenodo API`](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
+Then, `Uploadv2/3.py` will go through the validation check of your model, generate the enriched metadata, and then use the [`Zenodo API`](https://developers.zenodo.org/) to publish your model to Zenodo and get a DOI for your model. 
 
 During the upload, your need to name your model/give title of your upload. Other neccessary information, creators and description, will be directly from your metadata.json.
 ```bash
@@ -155,7 +155,7 @@ If you choose `No`, you can publish your model by yourself. You can visit the as
 #### Update new version
 If you previously uploaded your model to Zenodo and want to update a new version of your model, use
 ```
-$ python2/3 Upload_Python2/3.py 'Update new version'
+$ python2/3 Uploadv2/3.py 'Update new version'
 ```
 To allow this functionality, your initial `metadata.json` needs to add a new key-value pair
 ```
@@ -168,7 +168,7 @@ Afterwards, Upload script will work in a way similar to what it would do with 'U
 #### Upload metadata to GitHub
 If you previously uploaded your model to Zenodo and want to create an enriched metadata for your model and upload metadata to GitHub, use 
 ```
-$ python2/3 Upload_Python2/3.py 'Upload metadata to GitHub'
+$ python2/3 Uploadv2/3.py 'Upload metadata to GitHub'
 ```
 And you need to add a key-value pair
 ```
@@ -178,7 +178,7 @@ in metadata.json. Your GitHub personal access token will be required for this fu
 
 
 #### Dealing with errors
-You will be given feedback when most errors happen. **If an error happens when you are uploading your model to Zenodo or uploading metadata to GitHub, it is recommended to delete the draft in Zenodo and the newly created enriched metadata in your forked branch before re-running `Upload_Python2/3.py`**
+You will be given feedback when most errors happen. **If an error happens when you are uploading your model to Zenodo or uploading metadata to GitHub, it is recommended to delete the draft in Zenodo and the newly created enriched metadata in your forked branch before re-running `Uploadv2/3.py`**
 
 ## Search and Download UFO models
 Users can use `Download.py` to search for UFO models using the metadata preserved in [UFO Models Preservation repository](https://github.com/Neubauer-Group/UFOMetadata) and download them from Zenodo.

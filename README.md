@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/516765685.svg)](https://zenodo.org/badge/latestdoi/516765685)
 
 # About `UFO` models
 `UFO` is the abbreviation of **U**niversal **F**eynRules **O**utput. UFO models are used to digitally store detailed information about the Lagrangian of a quantum field theory, such as names, [PDG IDs](https://doi.org/10.1007/BF02683426), and physical properties of elementary particles, relevant parameters (like coupling strengths), and vertices associated with Feynman Diagrams. They are developed as self-sustained Python libraries and can be used by Monte Carlo event generators such as [MadGraph](http://madgraph.phys.ucl.ac.be) to simulate physics processes in a collider experiment. UFO models are widely used in the context of the BSM theories. 

@@ -2,7 +2,7 @@
 # About `UFO` models
 `UFO` is the abbreviation of **U**niversal **F**eynRules **O**utput. UFO models are used to digitally store detailed information about the Lagrangian of a quantum field theory, such as names, [PDG IDs](https://doi.org/10.1007/BF02683426), and physical properties of elementary particles, relevant parameters (like coupling strengths), and vertices associated with Feynman Diagrams. They are developed as self-sustained Python libraries and can be used by Monte Carlo event generators such as [MadGraph](http://madgraph.phys.ucl.ac.be) to simulate physics processes in a collider experiment. UFO models are widely used in the context of the BSM theories. 
 
-Further details about the content and format of UFO models can be found in the article: [UFO – The Universal FeynRules Output](https://doi.org/10.1016/j.cpc.2012.01.022). Also, you can find examples of different UFO models in this webpage: [https://feynrules.irmp.ucl.ac.be/wiki/NLOModels](https://feynrules.irmp.ucl.ac.be/wiki/NLOModels).
+Further details about the content and format of UFO models can be found in the article: [UFO – The Universal FeynRules Output](https://doi.org/10.1016/j.cpc.2012.01.022). Also, you can find examples of different UFO models in this webpage: [https://feynrules.irmp.ucl.ac.be/wiki/ModelDatabaseMainPage](https://feynrules.irmp.ucl.ac.be/wiki/ModelDatabaseMainPage).
 
 # About `FAIR` principles
 `FAIR` stands for **F**indable, **A**ccessible, **I**nteroperable, and **R**eusable. FAIR principles were originally proposed in [this paper](https://doi.org/10.1038/sdata.2016.18) as domain-agnostic guidelines on preservation and management of scientific data. These principles have also been interpreted in the context of other digital objects like research software, machine learning (ML) models, notebooks etc. These guidelines focus on persistent preservation of such contents so that they are well-preserved, easily found, and reused, with additional emphasis on improving the ability of machines to automatically search and use digital contents and aims to help users better access and reuse those existing data. For more information of FAIR principles, you can visit [GO FAIR](https://www.go-fair.org/fair-principles).
@@ -21,7 +21,7 @@ You need to do a series of preparation work before being able to use the Upload 
 ### Environment Build
 A Python virtual environment is recommended for executing `Uploadv2.py` or `Uploadv3.py` in command line interface. Necessary Python packages need to be installed. The Python2 support is enabled since many of the existing UFO models have been developed in Python2 and still used as is or with conversion locally performed by Python version conversion tools provided as plug-ins with Monte Carlo Generator Softwares like MadGraph.
 
-**To run the script with Python3**, one needs to build a Python3 virtual environment. You can do it with
+**To run the script with Python3** (i.e. to use `Uploadv3.py`), one needs to build a Python3 virtual environment. You can do it with
 ```bash
 $ python3 -m venv Your_virtual_envirenment_name
 ```
@@ -34,7 +34,7 @@ After that, install neccessary packages,
 ```bash
 (Your_virtual_envirenment_name)$ pip install requests PyGithub termcolor
 ```
-**To run the script with Python2**, one needs to build a Python2 virtual environment within a Python3 supported system. This needs installing the `virtualenv` package:
+**To run the script with Python2** (i.e. to use `Uploadv2.py`), one needs to build a Python2 virtual environment within a Python3 supported system. This needs installing the `virtualenv` package:
 ```bash
 $ python3 -m pip install virtualenv
 ```
@@ -69,7 +69,7 @@ or
     --object_library.py
     ...
 ```
-For metadata.json, some basic information is required. You can see the requirements in [example](https://github.com/Neubauer-Group/UFOManager/blob/main/metadata.json). For author information in `metadata.json`, affiliation and contact are optional, but at least one contact is needed. It also requires a reference to an associated publication (either an [arxiv](https:://arxiv.org) Id or a `DOI`) that contains the necessary physics details and validation.
+For metadata.json, some basic information is required. You can see the requirements in [this example](https://github.com/Neubauer-Group/UFOManager/blob/main/metadata.json). For author information in `metadata.json`, affiliation and contact are optional, but at least one contact is needed. It also requires a reference to an associated publication (either an [arxiv](https:://arxiv.org) Id or a `DOI`) that contains the necessary physics details and validation.
 
 ### Usage
 After everything being set up, you can download `Uploadv2.py` or `Uploadv3.py`, put it in your current working directory and execute it. The Upload function provides developers with 5 choices:
@@ -142,15 +142,15 @@ $ Please enter your model version: Your model version
 ```
 If everything goes well, you can see a new draft in your Zenodo account. A reserved Zenodo DOI will be created. The new metadata file will be created in `Your_Model_Folder`. After that, the [UFO Models Preservation repository](https://github.com/Neubauer-Group/UFOMetadata) used for metadata preservation will be forked in your Github account, the new metadata will be added. 
 
-**Note**: If you folked [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) before, make sure that your forked branch is up-to-date with orginal one.
+**Note**: If you forked [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) before, make sure that your forked branch is up-to-date with orginal one.
 
 Before finally publishing your model and uploading new enriched metadata to GitHub, you can make some changes to your Zenodo draft. And you can choose whether to continue
 ```
 $ Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? Yes or No: Yes, or No
 ```
-If you choose `Yes`, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A CI-enabled autocheck will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact Zijun Wang [zijun4@illinois.edu] or Avik Roy [avroy@illinois.edu].
+If you choose `Yes`, your model will be published to Zenodo, a pull request of your new enriched metadata will be created. A CI-enabled autocheck will run when pull request is made. This check may last for 5 minutes to make sure that model's DOI page is avaliable. If any problem happens, please contact Zijun Wang (zijun4@illinois.edu) or Avik Roy (avroy@illinois.edu).
 
-If you choose `No`, you can publish your model by yourself. You can visit the associated Zenodo draft, edit it and publish. Afterwards, you can create the pull request to add your enriched metadata to [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) by yourself, or send your enriched metadata file to Zijun Wang [zijun4@illinois.edu] or Avik Roy [avroy@illinois.edu].
+If you choose `No`, you can publish your model by yourself. You can visit the associated Zenodo draft, edit it and publish. Afterwards, you can create the pull request to add your enriched metadata to [UFOMetadata](https://github.com/Neubauer-Group/UFOMetadata) by yourself, or send your enriched metadata file to Zijun Wang (zijun4@illinois.edu) or Avik Roy (avroy@illinois.edu).
 
 #### Update new version
 If you previously uploaded your model to Zenodo and want to update a new version of your model, use

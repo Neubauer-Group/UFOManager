@@ -469,10 +469,39 @@ def is_parent(child, parent):
     return is_parent(child.parents[0], parent)
 
         
-def uploader(model_path, myfork, params):
+def uploader(model_path,myrepo, myfork, params):
     
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
+
+    '''Check metadata file name'''
+    Allmetadata = myrepo.get_contents('Metadata')
+    Allmetadataname = [i.name for i in Allmetadata]
+    while True:
+        if metadata_name in Allmetadataname:
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url += metadata_name
+            metadata = requests.get(url)
+            open(metadata_name,'wb').write(metadata.content)
+            with open(metadata_name,encoding='utf-8') as metadata:
+                file = json.load(metadata)
+            DOI = file['Model Doi']
+            print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
+            os.remove(metadata_name)
+            continuecommand = raw_input('Do you want to continue your upload?' + \
+                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+            if continuecommand == 'Yes':
+                while True:
+                    metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
+                    try:
+                        assert metadata_name.endswith('.json')
+                        break
+                    except:
+                        print('Your metadata file name should end with ' + colored('.json', 'red') + '.')
+            else:
+                sys.exit()
+        else:
+            break
 
     '''    Check if  Zenodo token works    '''    
     # Create an empty upload
@@ -602,7 +631,7 @@ def uploader_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        uploader(model_path = os.getcwd(), myfork = myfork, params = params)
+        uploader(model_path = os.getcwd(), myrepo= repo, myfork = myfork, params = params)
         os.chdir(base_path)
 
     # Pull Request from forked branch to original
@@ -616,7 +645,7 @@ def uploader_all(all_models):
     )
 
 
-def updatenewversion(model_path, myfork, params, depositions):
+def updatenewversion(model_path, myrepo, myfork, params, depositions):
 
     '''    Check for necessary files and their formats    '''
     original_file = os.listdir(model_path)
@@ -653,6 +682,35 @@ def updatenewversion(model_path, myfork, params, depositions):
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
     
+    '''Check metadata file name'''
+    Allmetadata = myrepo.get_contents('Metadata')
+    Allmetadataname = [i.name for i in Allmetadata]
+    while True:
+        if metadata_name in Allmetadataname:
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url += metadata_name
+            metadata = requests.get(url)
+            open(metadata_name,'wb').write(metadata.content)
+            with open(metadata_name,encoding='utf-8') as metadata:
+                file = json.load(metadata)
+            DOI = file['Model Doi']
+            print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
+            os.remove(metadata_name)
+            continuecommand = raw_input('Do you want to continue your upload?' + \
+                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+            if continuecommand == 'Yes':
+                while True:
+                    metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
+                    try:
+                        assert metadata_name.endswith('.json')
+                        break
+                    except:
+                        print('Your metadata file name should end with ' + colored('.json', 'red') + '.')
+            else:
+                sys.exit()
+        else:
+            break
+
     '''    Find corresponding old version from the concept DOI    '''
     filenames = []
     found_entry = False
@@ -828,7 +886,7 @@ def newversion_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        updatenewversion(model_path = os.getcwd(), myfork = myfork, params = params, depositions = r.json())
+        updatenewversion(model_path = os.getcwd(), myrepo= repo, myfork = myfork, params = params, depositions = r.json())
         os.chdir(base_path)
 
     # Pull Request from forked branch to original
@@ -843,7 +901,7 @@ def newversion_all(all_models):
 
 
 
-def githubupload(model_path, myfork):
+def githubupload(model_path, myrepo, myfork):
     '''    Check for necessary files and their formats    '''
     original_file = os.listdir(model_path)
 
@@ -882,6 +940,34 @@ def githubupload(model_path, myfork):
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)
 
+    '''Check metadata file name'''
+    Allmetadata = myrepo.get_contents('Metadata')
+    Allmetadataname = [i.name for i in Allmetadata]
+    while True:
+        if metadata_name in Allmetadataname:
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url += metadata_name
+            metadata = requests.get(url)
+            open(metadata_name,'wb').write(metadata.content)
+            with open(metadata_name,encoding='utf-8') as metadata:
+                file = json.load(metadata)
+            DOI = file['Model Doi']
+            print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
+            os.remove(metadata_name)
+            continuecommand = raw_input('Do you want to continue your upload?' + \
+                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+            if continuecommand == 'Yes':
+                while True:
+                    metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
+                    try:
+                        assert metadata_name.endswith('.json')
+                        break
+                    except:
+                        print('Your metadata file name should end with ' + colored('.json', 'red') + '.')
+            else:
+                sys.exit()
+        else:
+            break
 
     '''    Upload to Github Repository    '''
 
@@ -922,7 +1008,7 @@ def githubupload_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        githubupload(model_path = os.getcwd(), myfork = myfork)
+        githubupload(model_path = os.getcwd(), myrepo= repo, myfork = myfork)
         os.chdir(base_path)
 
     # Pull Request from forked branch to original

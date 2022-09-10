@@ -64,7 +64,7 @@ def validator(model_path):
         assert file['Paper_id']
     except:
         raise Exception(colored('"Paper_id" field does not exist in metadata', 'red'))
-    assert file['Paper_id']['doi'] or file['Paper_id']['arXiv'], \
+    assert 'doi' in file['Paper_id'] or 'arXiv' in file['Paper_id'], \
         Exception(colored('"Paper_id" field does not contain doi or arXiv ID', 'red'))
     if 'doi' in file['Paper_id']:
         url = 'https://doi.org/' + file['Paper_id']['doi']
@@ -442,7 +442,7 @@ def metadatamaker(model_path, create_file = True):
                 }
 
     file.update(newcontent)
-    meta_name = filename.split('.')[0]
+    meta_name = filename.split('.')[0].strip()
     if not meta_name:
         raise Exception("Invalid filename: '{}', please check".format(filename))
     metadata_name =  meta_name + '.json'
@@ -675,7 +675,7 @@ def updatenewversion(model_path, myfork, params, depositions):
 
     print('Your previous upload contains the file(s): %s. Do you want to delete them?' %(colored(','.join(filenames), 'magenta')))
 
-    deletelist = input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')
+    deletelist = [f.strip() for f in input('Please enter file names you want to delete in your new version, separated names with comma, or Enter ' + colored("No", "red") + ": ").split(',')]
 
 
     # Work with new version draft

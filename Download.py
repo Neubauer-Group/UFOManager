@@ -67,17 +67,24 @@ def Display(jsonlist):
 
 def Search(Github_Access_Token):
     global api_path
-    
+    valid_search_keys = ['Paper_id', 'Model Doi', 'pdg code', 'name']
     # Start the Interface
-    print('You can search for model with Paper_id, Model Doi, pdg code or name (of certain particles).')
+    print('You can search for model with {}, {}, {}, {} (of certain particles).'.format(colored('Paper_id', 'magenta'),
+                                                                                                                   colored('Model Doi', 'magenta'),
+                                                                                                                   colored('pdg code', 'magenta'),
+                                                                                                                   colored('name', 'magenta'))
+    )
+    all_json_file = set()
     
     # Now allows multiple times search
     while True:
-        search_type = input('Please choose your keyword type:')
-
+        search_type = input('Please choose your keyword type: ')
+        if search_type not in valid_search_keys:
+            print(colored('Invalid Keyword!', 'red'))
+        
         # Search for models with corresponding paper id
         if search_type == 'Paper_id':
-            paper_id = input('Please enter your needed paper_id:')
+            paper_id = input('Please enter your needed paper_id: ')
             
             target_list = []
             for file in os.listdir('.'):
@@ -92,10 +99,11 @@ def Search(Github_Access_Token):
             else:
                 print('Based on your search, we find models below:')
                 Display(jsonlist=target_list)
+                all_json_file = all_json_file.union(target_list)
         
         # Search for models with corresponding model Doi from Zenodo
         if search_type == 'Model Doi':
-            Model_Doi = input('Please enter your needed Model doi:')
+            Model_Doi = input('Please enter your needed Model doi: ')
 
             model_name = ''
             target_list = []
@@ -136,6 +144,7 @@ def Search(Github_Access_Token):
                             target_list.append(file)
                 print('Based on your search, we find models below:')                                                        
                 Display(jsonlist=target_list)
+                all_json_file = all_json_file.union(target_list)
             else:
                 print('There is no model associated with the Model Doi ' + colored(Model_Doi,'red') + ' you are looking for.') 
             
@@ -143,7 +152,7 @@ def Search(Github_Access_Token):
         
         # Search for models with particles' pdg codes
         if search_type == 'pdg code':
-            pdg_code = input('Please enter your needed pdg code:').split(',')
+            pdg_code = [f.strip() for f in input('Please enter your needed pdg code: ').split(',')]
             pdg_code_list = [int(i) for i in pdg_code]
             target_list = []
             elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
@@ -166,11 +175,12 @@ def Search(Github_Access_Token):
                 else:
                     print('Based on your search, we find models below:')
                     Display(jsonlist=target_list)
+                    all_json_file = all_json_file.union(target_list)
                     
         
         # Search for models with particles' names
         if search_type == 'name':
-            particle_name_list = input('Please enter your needed particle name:').split(',')
+            particle_name_list = [f.strip() for f in input('Please enter your needed particle name: ').split(',')]
             pdg_code_corresponding_list = []
             target_list = []
 
@@ -203,24 +213,30 @@ def Search(Github_Access_Token):
             if len(target_list) != 0:
                 print('Based on your search, we find models below:')
                 Display(jsonlist=target_list)
+                all_json_file = all_json_file.union(target_list)
                                 
 
         # Stop the loop and exit search part     
-        if input('Do you still want to search for models? Please type in Yes or No.') == 'No':
+        if input('Do you still want to search for models? Please type in {} or {}: '.format(colored('Yes', 'green'), colored('No','red'))) == 'No':
             break
+        
+    return list(all_json_file)
 
 
 
-def Download(Github_Access_Token):
+def Download(Github_Access_Token, filelist=None):
     global api_path
     print('Here is the UFOModel metadata file list.')
-    print(os.listdir('.'))
+    if not filelist:
+        print("\n".join(list(os.listdir('.'))))
+    else:
+        print("\n".join(filelist))
 
     # Start download part
-    download_command = input('You can choose the metadata you want to download:')
+    download_command = input('Enter a comma separated list of metadata filenames from the list above to download corresponding files: ')
 
     # Get models' doi
-    download_list = download_command.split(',')
+    download_list = [f.strip() for f in download_command.split(',')]
     download_doi = []
     for file in download_list:
         with open(file,encoding='utf-8') as metadata:
@@ -229,7 +245,7 @@ def Download(Github_Access_Token):
 
     os.chdir(api_path)
 
-    foldername = input('Please name your download folder:')
+    foldername = input('Please name your download folder: ')
     os.mkdir(foldername)
     os.chdir(foldername)
 
@@ -242,8 +258,8 @@ def Download(Github_Access_Token):
     print('You have successfully downloaded your needed models in %s under the same path with this python script.' %(foldername))
 
 def Search_Download(Github_Access_Token):
-    Search(Github_Access_Token)
-    Download(Github_Access_Token)
+    jsonlist = Search(Github_Access_Token)
+    Download(Github_Access_Token, jsonlist)
 
 def Delete():
     global api_path

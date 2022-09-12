@@ -1,0 +1,20 @@
+{
+    "creators": [
+        {
+            "affiliation": "University of Illinois at Urbana-Champaign",
+            "name": "Wang, Zijun"
+        },
+        {
+            "affiliation": "University of Illinois at Urbana-Champaign",
+            "name": "Roy, Avik"
+        },
+        {
+            "affiliation": "University of Illinois at Urbana-Champaign",
+            "name": "Neubauer, Mark"
+        }
+    ],
+
+    "license": "Apache-2.0",
+
+    "title": "UFOManager: Tools to preserve and download Universal FeynRules Output (UFO) models"
+}

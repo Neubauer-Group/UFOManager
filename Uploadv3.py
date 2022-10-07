@@ -84,6 +84,14 @@ def validator(model_path):
     except:
         raise Exception(colored('"Description" field does not exist in metadata', 'red'))
 
+    # Check uploaded metadata.json for Model Homepage if exists
+
+    if 'Model Homepage' in file:
+        try:
+            assert requests.get(file['Model Homepage']).status_code < 400
+        except:
+            raise Exception(colored('"Model Homepage" link is invalid in metadata', 'red'))
+    
     '''    Unpack the model inside a directory called "ModelFolder"     '''
     
     for _file in original_file:
@@ -422,11 +430,19 @@ def metadatamaker(model_path, create_file = True):
     modelname = input('Please name your model:')
     modelversion = input('Please enter your model version:')
     Doi = "0"
+    if 'Model Homepage' in file:
+        Homepage = file['Model Homepage']
+    else:
+        if create_file:
+            Homepage = input('Please enter your model homepage:')
+        else:
+            Homepage = ''
     # if create_file or "Model Doi" not in file.keys():
     #    Doi = input('Please enter your Model Doi, enter 0 if not have one:')
     if  "Model Doi" in file.keys():
         Doi = file["Model Doi"]
     newcontent = {'Model name' : modelname,
+                'Model Homepage' : Homepage,
                 'Model Doi' : Doi,
                 'Model Version' : modelversion,
                 'Model Python Version' : 'Python3',
@@ -561,6 +577,10 @@ def uploader(model_path, myrepo, myfork, params):
         print("Status Code: {}".format(r.status_code))
         raise Exception
     file["Model Doi"] = Doi
+
+    # Use Zenodo page as Homepage if there's no homepage provided
+    if len(file['Model Homepage']) == 0:
+        file['Model Homepage'] = 'https://doi.org/' + Doi
 
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)
@@ -817,6 +837,10 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
 
     file["Model Doi"] = Doi
 
+    # Use Zenodo page as Homepage if there's no homepage provided
+    if len(file['Model Homepage']) == 0:
+        file['Model Homepage'] = 'https://doi.org/' + Doi
+
     '''    Create enriched metadata file    '''
     newmetadataname = metadata_name.split('.')[0] + '.V' + file['Model Version'] + '.json' 
 
@@ -938,6 +962,10 @@ def githubupload(model_path, myrepo, myfork):
     
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
+
+    # Use Zenodo page as Homepage if there's no homepage provided
+    if len(file['Model Homepage']) == 0:
+        file['Model Homepage'] = 'https://doi.org/' + file['Model Doi']
 
     with open(metadata_name,'w') as metadata:
         json.dump(file,metadata,indent=2)

@@ -54,15 +54,15 @@ def Display(jsonlist):
         with open(file,encoding='utf-8') as metadata:
             metadatafile = json.load(metadata)
         if 'arXiv' in metadatafile['Paper_id']:
-            information = [file,metadatafile['Model name'],{'arXiv' : metadatafile['Paper_id']['arXiv']},metadatafile['Description']]
+            information = [file,metadatafile['Model name'],{'arXiv' : metadatafile['Paper_id']['arXiv']},metadatafile['Model Homepage'],metadatafile['Description']]
         else:
             if 'doi.org' in metadatafile['Paper_id']['doi']:
-                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi'][16:]},metadatafile['Description']]
+                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi'][16:]},metadatafile['Model Homepage'],metadatafile['Description']]
             else:
-                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi']},metadatafile['Description']]
+                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi']},metadatafile['Model Homepage'],metadatafile['Description']]
         display_data.append(information)
     
-    print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Description"]))
+    print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Model Homepage","Description"]))
         
 
 def Search(Github_Access_Token):

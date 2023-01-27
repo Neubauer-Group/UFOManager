@@ -635,7 +635,7 @@ def uploader(model_path, myrepo, myfork, params):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -662,7 +662,7 @@ def uploader(model_path, myrepo, myfork, params):
     '''    Check if  Zenodo token works    '''    
     # Create an empty upload
     headers = {"Content-Type": "application/json"}
-    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions", 
+    r = requests.post("https://zenodo.org/api/deposit/depositions", 
                       params= params,
                       json= {},
                       headers= headers)
@@ -706,7 +706,7 @@ def uploader(model_path, myrepo, myfork, params):
     }
 
     # Add required metadata to draft
-    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
                      params=params,
                      data=json.dumps(data),
                      headers=headers)
@@ -737,7 +737,7 @@ def uploader(model_path, myrepo, myfork, params):
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
-            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                               params=params)
             if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
@@ -757,7 +757,7 @@ def uploader_all(all_models):
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
@@ -769,7 +769,7 @@ def uploader_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -847,7 +847,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -883,7 +883,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
     assert found_entry, colored('The zenodo entry corresponding to DOI: {} not found'.format(file['Existing Model Doi']), 'red')
 
     old_deposition_id = entry['links']['latest'].strip().split('/')[-1]
-    _r = requests.get("https://sandbox.zenodo.org/api/records/{}".format(old_deposition_id), params=params)
+    _r = requests.get("https://zenodo.org/api/records/{}".format(old_deposition_id), params=params)
     for _file in _r.json()['files']:
         link = _file['links']['self'].strip()
         fname = link.split('/')[-1]
@@ -896,7 +896,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
 
     # Work with new version draft
     '''    Request a  new version    '''
-    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
+    r = requests.post("https://zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
     if r.status_code > 400:
         print(colored("Creating deposition entry with Zenodo Failed!", "red"))
         print("Status Code: {}".format(r.status_code))
@@ -906,7 +906,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
     new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
     
     if deletelist[0] != 'No':
-        r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
+        r = requests.get("https://zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
         if r.status_code > 400:
             print(colored("Could not fetch file details from latest version!", "red"))
             print("Status Code: {}".format(r.status_code))
@@ -918,7 +918,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
 
     headers = {"Content-Type": "application/json"}
     
-    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+    r = requests.get('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      json={},
                      params=params,
                      headers=headers )
@@ -963,7 +963,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
         }
     }
 
-    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      params=params,
                      data=json.dumps(data),
                      headers=headers)
@@ -997,7 +997,7 @@ def newversion(model_path, myrepo, myfork, params, depositions):
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
-            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
+            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
                               params=params)
             if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
@@ -1016,7 +1016,7 @@ def newversion_all(all_models):
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
@@ -1028,7 +1028,7 @@ def newversion_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -1113,7 +1113,7 @@ def githubupload(model_path, myrepo, myfork):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -1154,7 +1154,7 @@ def githubupload_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('ThanosWang/UFOMetadata')
+        repo = g.get_repo('Neubauer-Group/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 

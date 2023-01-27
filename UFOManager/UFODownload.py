@@ -1,7 +1,10 @@
+import sys
+from termcolor import colored
+if sys.version_info.major == 2:
+    raise Exception(colored('UFODownload.py only works for Python 3','red'))
 from github import Github
 import os
 import requests
-import sys
 import shutil
 import json
 import zenodo_get
@@ -9,18 +12,19 @@ from getpass import getpass
 import argparse
 from tabulate import tabulate
 from termcolor import colored
-# This python script utilizes zenodo_get package from David Völgyes 
-# David Völgyes. (2020, February 20). Zenodo_get: a downloader for Zenodo records (Version 1.3.4).
+from particle import PDGID
+# This python script utilizes zenodo_get package from David Volgyes
+# David Volgyes. (2020, February 20). Zenodo_get: a downloader for Zenodo records (Version 1.3.4).
 # Zenodo. https://doi.org/10.5281/zenodo.1261812
 
 # Bibtex format:
 '''@misc{david_volgyes_2020_10.5281/zenodo.1261812,
-  author  = {David Völgyes},
-  title   = {Zenodo_get: a downloader for Zenodo records.},
-  month   = {2},
-  year    = {2020},
-  doi     = {10.5281/zenodo.1261812},
-  url     = {https://doi.org/10.5281/zenodo.1261812}
+author  = {David V\"{o}lgyes},
+title   = {Zenodo_get: a downloader for Zenodo records.},
+month   = {2},
+year    = {2020},
+doi     = {10.5281/zenodo.1261812},
+url     = {https://doi.org/10.5281/zenodo.1261812}
 }'''
 
 
@@ -54,15 +58,15 @@ def Display(jsonlist):
         with open(file,encoding='utf-8') as metadata:
             metadatafile = json.load(metadata)
         if 'arXiv' in metadatafile['Paper_id']:
-            information = [file,metadatafile['Model name'],{'arXiv' : metadatafile['Paper_id']['arXiv']},metadatafile['Model Homepage'],metadatafile['Description']]
+            information = [file,metadatafile['Model name'],metadatafile['Paper_id']['arXiv'],metadatafile['Model Doi']] #metadatafile['Description']]
         else:
             if 'doi.org' in metadatafile['Paper_id']['doi']:
-                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi'][16:]},metadatafile['Model Homepage'],metadatafile['Description']]
+                information = [file,metadatafile['Model name'],metadatafile['Paper_id']['doi'][16:],metadatafile['Model Doi']] #,metadatafile['Description']]
             else:
-                information = [file,metadatafile['Model name'],{'doi' : metadatafile['Paper_id']['doi']},metadatafile['Model Homepage'],metadatafile['Description']]
+                information = [file,metadatafile['Model name'],metadatafile['Paper_id']['doi'],metadatafile['Model Doi']] #,metadatafile['Description']]
         display_data.append(information)
     
-    print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Model Homepage","Description"]))
+    print(tabulate(display_data, headers=["Metadata file","Model Name","Paper ID","Model DOI"]))
         
 
 def Search(Github_Access_Token):
@@ -70,9 +74,9 @@ def Search(Github_Access_Token):
     valid_search_keys = ['Paper_id', 'Model Doi', 'pdg code', 'name']
     # Start the Interface
     print('You can search for model with {}, {}, {}, {} (of certain particles).'.format(colored('Paper_id', 'magenta'),
-                                                                                                                   colored('Model Doi', 'magenta'),
-                                                                                                                   colored('pdg code', 'magenta'),
-                                                                                                                   colored('name', 'magenta'))
+                                                                                                                colored('Model Doi', 'magenta'),
+                                                                                                                colored('pdg code', 'magenta'),
+                                                                                                                colored('name', 'magenta'))
     )
     all_json_file = set()
     
@@ -155,8 +159,11 @@ def Search(Github_Access_Token):
             pdg_code = [f.strip() for f in input('Please enter your needed pdg code: ').split(',')]
             pdg_code_list = [int(i) for i in pdg_code]
             target_list = []
-            elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
-            elementary_particle_compare = all(i in elementary_particles for i in pdg_code_list)
+            elementary_particles_list = []
+            for i in pdg_code_list:
+                if PDGID(i).is_sm_quark == True or PDGID(i).is_sm_gauge_boson_or_higgs == True or PDGID(i).is_sm_lepton == True:
+                    elementary_particles_list.append(i)
+            elementary_particle_compare = all(i in elementary_particles_list for i in pdg_code_list)
             Feedback = 'All particles you are looking for are elementary particles which are contained by all models. Please try again with BSM particles.'
             if elementary_particle_compare:
                 print(colored(Feedback,'red'))
@@ -193,8 +200,11 @@ def Search(Github_Access_Token):
                     pdg_code_corresponding_list = [metadatafile['All Particles'][i] for i in particle_name_list]
                     break
             if pdg_code_corresponding_list != []:
-                elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
-                elementary_particle_compare = all(i in elementary_particles for i in pdg_code_corresponding_list)
+                elementary_particles_list = []
+                for i in pdg_code_corresponding_list:
+                    if PDGID(i).is_sm_quark == True or PDGID(i).is_sm_gauge_boson_or_higgs == True or PDGID(i).is_sm_lepton == True:
+                        elementary_particles_list.append(i)
+                elementary_particle_compare = all(i in elementary_particles_list for i in pdg_code_corresponding_list)
                 Feedback = 'All particles you are looking for are elementary particles which are contained by all models. Please try again with BSM particles.'
                 if elementary_particle_compare:
                     print(colored(Feedback,'red'))
@@ -224,7 +234,7 @@ def Search(Github_Access_Token):
 
 
 
-def Download(Github_Access_Token, filelist=None):
+def Downloader(Github_Access_Token, filelist=None):
     global api_path
     print('Here is the UFOModel metadata file list.')
     if not filelist:
@@ -246,10 +256,14 @@ def Download(Github_Access_Token, filelist=None):
     os.chdir(api_path)
 
     foldername = input('Please name your download folder: ')
-    os.mkdir(foldername)
-    os.chdir(foldername)
+    
+    try:
+        os.mkdir(foldername)
+        os.chdir(foldername)
+    except FileExistsError:
+        os.chdir(foldername)
 
-    # Download model files from zenodo using zenodo_get created by David Völgyes
+    # Download model files from zenodo using zenodo_get created by David Volgyes
     for i in download_doi:
         single_download_doi = []
         single_download_doi.append(i)
@@ -259,17 +273,35 @@ def Download(Github_Access_Token, filelist=None):
 
 def Search_Download(Github_Access_Token):
     jsonlist = Search(Github_Access_Token)
-    Download(Github_Access_Token, jsonlist)
+    Downloader(Github_Access_Token, jsonlist)
 
 def Delete():
     global api_path
     os.chdir(api_path)
     shutil.rmtree('MetadatafilesTemporaryFolder')
 
+def UFODownload(command):
+    global api_path
+    api_path = os.getcwd()
+    Github_Access_Token = getpass('Please enter you Github access token:')
+    AccessGitRepo(Github_Access_Token=Github_Access_Token)
+
+    if command == 'Search for model':
+        Search(Github_Access_Token=Github_Access_Token)
+        Delete()
+    elif command == 'Download model':
+        Downloader(Github_Access_Token=Github_Access_Token)
+        Delete()
+    elif command == 'Search and Download':
+        Search_Download(Github_Access_Token=Github_Access_Token)
+        Delete()
+    else:
+        print('Wrong command! Please choose from ["Search for model", "Download model", "Search and Download"].')
+        Delete()
 
 if __name__ == '__main__':
     FUNCTION_MAP = {'Search for model' : Search,
-                'Download model' : Download,
+                'Download model' : Downloader,
                 'Search and Download': Search_Download}
 
     parser = argparse.ArgumentParser()
@@ -282,5 +314,3 @@ if __name__ == '__main__':
     AccessGitRepo(Github_Access_Token=Github_Access_Token)
     RunFunction(Github_Access_Token=Github_Access_Token)
     Delete()
-
-    

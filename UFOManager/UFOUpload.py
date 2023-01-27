@@ -12,6 +12,10 @@ import argparse
 from termcolor import colored, cprint
 import re
 import datetime
+from particle import PDGID
+
+if sys.version_info.major == 3:
+    raw_input = input
 
 regex = r'[^@]+@[^@]+\.[^@]+'
 
@@ -52,8 +56,8 @@ def validator(model_path):
         except:
             raise Exception(colored('At least one author name does not exist in metadata', 'red'))
         if 'contact' in i:
-            assert re.match(regex, i['contact'].strip()), \
-                Exception(colored('At least one author contact is not a valid email address', 'red'))
+            if not re.match(regex, i['contact'].strip()):
+                print(colored('At least one author contact is not a valid email address, please check!', 'yellow'))
             all_contact.append(i['contact'])
     assert all_contact != [], colored('No contact information for authors exists ', 'red')
     print('Check author information and contact information in initial metadata:' + colored(' PASSED!', 'green'))
@@ -91,7 +95,7 @@ def validator(model_path):
             assert requests.get(file['Model Homepage']).status_code < 400
         except:
             raise Exception(colored('"Model Homepage" link is invalid in metadata', 'red'))
-
+    
     '''    Unpack the model inside a directory called "ModelFolder"     '''
     
     for _file in original_file:
@@ -136,29 +140,55 @@ def validator(model_path):
     sys.path.append(model_path)
     modelloc = model_path + '/ModelFolder'
     sys.path.insert(0,modelloc)
-    
-    try:
-        UFOModel = importlib.import_module('ModelFolder')
-    except SyntaxError:
-        os.chdir(model_path)
-        shutil.rmtree('ModelFolder')
-        raise Exception('Your model may have invalid syntaxes, please check again')
-    except ImportError:
-        os.chdir(model_path)
-        shutil.rmtree('ModelFolder')
-        raise Exception(colored('The model may be missing some files, please check again', 'red'))
-    except AttributeError:
-        os.chdir(model_path)
-        shutil.rmtree('ModelFolder')
-        raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
-    except NameError:
-        os.chdir(model_path)
-        shutil.rmtree('ModelFolder')
-        raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
-    except TypeError:
-        os.chdir(model_path)
-        shutil.rmtree('ModelFolder')
-        raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+
+    if sys.version_info.major == 3:
+        try:
+            UFOModel = importlib.import_module('ModelFolder')
+        except SyntaxError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be not compatible with Python3 or have invalid code syntaxes. Please check and try with Python2 instead',
+                                    'red'))
+        except ModuleNotFoundError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be missing some files, please check again', 'red'))
+        except AttributeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+        except NameError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+        except TypeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+    else:
+        try:
+            UFOModel = importlib.import_module('ModelFolder')
+        except SyntaxError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception('Your model may have invalid syntaxes, please check again')
+        except ImportError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('The model may be missing some files, please check again', 'red'))
+        except AttributeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Undefined variables in your imported modules, please check again', 'red'))
+        except NameError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('Some modules/variables not imported/defined, please check again', 'red'))
+        except TypeError:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
+            raise Exception(colored('At least one of the variables is missing required positional argument, please check again.','red'))
+        
     os.chdir('ModelFolder')
 
     print("Check for module imported as a python package: " + colored("PASSED!", "green"))
@@ -220,7 +250,7 @@ def validator(model_path):
 
     del sys.modules['parameters']
     
-    # Check particles.py and if contains particles
+    # Check particles.py and all particles
     try:
         import particles
     except ImportError:
@@ -229,31 +259,66 @@ def validator(model_path):
         raise Exception(colored('The file "particles.py" could not be imported. Please check again', 'red'))
 
     particle_dict = {}
-    new_particle_dict = {}
+    SM_elementary_particle_dict = {}
+    BSM_elementary_particle_with_registered_PDGID_dict = {}
+    Particle_with_PDG_like_ID_dict = {}
     pdg_code_list = []
-    number_of_particles = 0
-    spin = [1, 2, 3, 5]
-    elementary_particles = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 11, 12, 13, 14, 15, 16, -11, -12, -13, -14, -15, -16, 9, 21, 22, 23, 24, -24, 25, 35, 36, 37, -37]
     for i in [item for item in dir(particles) if not item.startswith("__")]:
         item = getattr(particles,i)
         if type(item) == (object_library.Particle):
-            number_of_particles += 1
-            particle_dict[item.name] = item.pdg_code
-            pdg_code_list.append(item.pdg_code)
-            if item.spin in spin and item.pdg_code not in elementary_particles:
-                new_particle_dict[item.name] = item.pdg_code
+            if item.GhostNumber == 0:
+                particle_dict[item.name] = item.pdg_code
+                pdg_code_list.append(item.pdg_code)
+
+                if PDGID(item.pdg_code).is_valid == True:
+                    if PDGID(item.pdg_code).three_charge != int(round(item.charge*3)):
+                        Particle_with_PDG_like_ID_dict[item.name] = {'id': item.pdg_code,
+                                                                     'spin': item.spin,
+                                                                     'charge': item.charge}
+                    if PDGID(item.pdg_code).j_spin != item.spin:
+                        if item.spin == 1 and PDGID(item.pdg_code).j_spin == None:
+                            pass
+                        else:
+                            Particle_with_PDG_like_ID_dict[item.name] = {'id': item.pdg_code,
+                                                                         'spin': item.spin,
+                                                                         'charge': item.charge}
+
+                    #if PDGID(item.pdg_code).is_quark or PDGID(item.pdg_code).is_lepton or PDGID(item.pdg_code).is_gauge_boson_or_higgs:
+                    if item.spin in [1,2,3]:   
+                        if PDGID(item.pdg_code).is_sm_quark or PDGID(item.pdg_code).is_sm_lepton or PDGID(item.pdg_code).is_sm_gauge_boson_or_higgs:
+                            SM_elementary_particle_dict[item.name] = item.pdg_code
+                        elif item.name not in Particle_with_PDG_like_ID_dict.keys():
+                            BSM_elementary_particle_with_registered_PDGID_dict[item.name] = item.pdg_code
+                else:
+                    Particle_with_PDG_like_ID_dict[item.name] = {'id': item.pdg_code,
+                                                                 'spin': item.spin,
+                                                                 'charge': item.charge}                    
 
     if len(particle_dict) == 0:
-        raise Exception(colored('There should be particles defined in "particles.py"', 'red'))
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
+        raise Exception(colored('There should be real particles defined in "particles.py"', 'red'))
 
     if len(set(pdg_code_list)) != len(pdg_code_list):
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
         raise Exception(colored('Some of your particles have same pdg code, please check again!', 'red'))
-    
+
     print('Check if model contains well behaved "particles.py": ' + colored("PASSED!", 'green'))
-    print('The model contains %i fundamental particles' %(number_of_particles))
-    print('The model contains %i new elementary particles and corresponding pdg codes are:'%(len(list(new_particle_dict.keys()))))
-    for key in new_particle_dict.keys():
-        print(key, new_particle_dict[key])
+
+    print('The model contains %i fundamental particles' %(len(SM_elementary_particle_dict)))
+
+    print('The model contains %i Standard Model elementary particles with registered pdg codes:'%(len(list(SM_elementary_particle_dict.keys()))))
+    for key in SM_elementary_particle_dict.keys():
+        print(key, SM_elementary_particle_dict[key])
+    
+    print('The model contains %i Beyond the Standard Model elementary particles with registered pdg codes:'%(len(list(BSM_elementary_particle_with_registered_PDGID_dict.keys()))))
+    for key in BSM_elementary_particle_with_registered_PDGID_dict.keys():
+        print(key, BSM_elementary_particle_with_registered_PDGID_dict[key])
+
+    print('The model contains %i particles with pdg-like codes:'%(len(list(Particle_with_PDG_like_ID_dict.keys()))))
+    for key in Particle_with_PDG_like_ID_dict.keys():
+        print(key, Particle_with_PDG_like_ID_dict[key])
 
     del sys.modules['particles']
 
@@ -274,6 +339,8 @@ def validator(model_path):
             number_of_vertices += 1
 
     if len(vertex) == 0:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
         raise Exception(colored('There should be vertices defined in "vertices.py"', 'red'))
     else:
         print('Check if model contains well behaved "vertices.py": ' + colored("PASSED!", 'green'))
@@ -298,6 +365,8 @@ def validator(model_path):
             number_of_coupling_orders += 1
 
     if len(coupling_order) == 0:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
         raise Exception(colored('There should be coupling orders defined in "coupling_orders.py"','red'))
     else:
         print('Check if model contains well behaved "coupling_orders.py": ' + colored("PASSED!", 'green'))
@@ -323,6 +392,8 @@ def validator(model_path):
             number_of_coupling_tensors += 1
 
     if len(coupling_tensor) == 0:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
         raise Exception('There should be coupling tensors defined in "couplings.py"')
     else:
         print('Check if model contains well behaved "couplings.py": ' + colored("PASSED!", 'green'))
@@ -348,6 +419,8 @@ def validator(model_path):
             number_of_lorentz_tensors += 1
 
     if len(lorentz_tensor) == 0:
+        os.chdir(model_path)
+        shutil.rmtree('ModelFolder')
         raise Exception(colored('There should be lorentz tensors defined in "lorentz.py"', 'red'))
     else:
         print('Check if model contains well behaved "lorentz.py": ' + colored("PASSED!", 'green'))
@@ -368,6 +441,8 @@ def validator(model_path):
                 number_of_propagators += 1
 
         if len(props) == 0:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
             raise Exception('There should be propagators defined in "propagators.py"')
         else:
             print('Check if model contains well behaved "propagators.py": ' + colored("PASSED!", 'green'))
@@ -389,6 +464,8 @@ def validator(model_path):
                 number_of_decays += 1
 
         if len(decay) == 0:
+            os.chdir(model_path)
+            shutil.rmtree('ModelFolder')
             raise Exception('There should be decays defined in "decays.py"')
         else:
             print('Check if model contains well behaved "decays.py": ' + colored("PASSED!", 'green'))
@@ -398,6 +475,66 @@ def validator(model_path):
         number_of_decays = 0
         pass
 
+    # Check if the model supports NLO calculations
+    try:
+        import CT_couplings
+        CT_coupling = []
+        for i in [item for item in dir(CT_couplings) if not item.startswith("__")]:
+            item = getattr(CT_couplings,i)
+            if type(item) == (object_library.Coupling):
+                CT_coupling.append(item.name)
+        if len(CT_coupling) == 0:
+            Check_CTCouplings = False
+            print('Check if model contains well behaved "CT_couplings.py": ' + colored("FAILED!", 'red'))
+        else:
+            print('Check if model contains well behaved "CT_couplings.py": ' + colored("PASSED!", 'green'))
+            Check_CTCouplings = True
+        del sys.modules['CT_couplings']
+    except ImportError:
+        print('Check if model contains well behaved "CT_couplings.py": ' + colored("FAILED!", 'red'))
+        Check_CTCouplings = False
+
+    try:
+        import CT_parameters
+        CT_parameter = []
+        for i in [item for item in dir(CT_parameters) if not item.startswith("__")]:
+            item = getattr(CT_parameters,i)
+            if type(item) == (object_library.CTParameter):
+                CT_parameter.append(item.name)
+        if len(CT_parameter) == 0:
+            Check_CTParameters = False
+            print('Check if model contains well behaved "CT_parameters.py": ' + colored("FAILED!", 'red'))
+        else:
+            print('Check if model contains well behaved "CT_parameters.py": ' + colored("PASSED!", 'green'))
+            Check_CTParameters = True
+    except ImportError:
+        print('Check if model contains well behaved "CT_parameters.py": ' + colored("FAILED!", 'red'))
+        Check_CTParameters = False
+
+    try:
+        import CT_vertices
+        CT_vertice = []
+        for i in [item for item in dir(CT_vertices) if not item.startswith("__")]:
+            item = getattr(CT_vertices,i)
+            if type(item) == (object_library.CTVertex):
+                CT_vertice.append(item.name)
+        if len(CT_vertice) == 0:
+            Check_CTVertices = False
+            print('Check if model contains well behaved "CT_vertices.py": ' + colored("FAILED!", 'red'))
+        else:
+            print('Check if model contains well behaved "CT_vertices.py": ' + colored("PASSED!", 'green'))
+            Check_CTVertices = True
+    except ImportError:
+        print('Check if model contains well behaved "CT_vertices.py": ' + colored("FAILED!", 'red'))
+        Check_CTVertices = True
+    
+    if Check_CTCouplings == True and Check_CTParameters == True and Check_CTVertices == True:
+        print(colored('The model allows NLO calculations.','green'))
+        NLO_value = True
+    else:
+        print(colored('The model does not allow NLO calculations.','red'))
+        NLO_value = False
+    
     # Finish the validation checking
     os.chdir(model_path)
     shutil.rmtree('ModelFolder')
@@ -409,7 +546,7 @@ def validator(model_path):
         if f in sys.modules.keys():
             del sys.modules[f]        
 
-    return file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays
+    return file, original_file, number_of_params, particle_dict, SM_elementary_particle_dict, Particle_with_PDG_like_ID_dict, BSM_elementary_particle_with_registered_PDGID_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays, NLO_value
 
 
 def validator_all(all_models):
@@ -422,7 +559,7 @@ def validator_all(all_models):
 
 def metadatamaker(model_path, create_file = True):
     # Check Validation and get necessary outputs
-    file, original_file, number_of_params, particle_dict, new_particle_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays = validator(model_path)
+    file, original_file, number_of_params, particle_dict, SM_elementary_particle_dict, Particle_with_PDG_like_ID_dict, BSM_elementary_particle_with_registered_PDGID_dict, number_of_vertices, number_of_coupling_orders, number_of_coupling_tensors, number_of_lorentz_tensors, number_of_propagators, number_of_decays, NLO_value = validator(model_path)
     filename = [i for i in original_file if i != 'metadata.json'][0]
     print('\nWorking on model: ' + colored(model_path, "magenta") + "\n")
     modelname = raw_input('Please name your model:')
@@ -443,9 +580,12 @@ def metadatamaker(model_path, create_file = True):
                 'Model Homepage' : Homepage,
                 'Model Doi' : Doi,
                 'Model Version' : modelversion,
-                'Model Python Version' : 'Python2',
+                'Model Python Version' : sys.version_info.major,
+                'Allows NLO calculations': NLO_value,
                 'All Particles' : particle_dict,
-                'New elementary particles' : new_particle_dict,
+                'SM particles' : SM_elementary_particle_dict,
+                'BSM particles with standard PDG codes': BSM_elementary_particle_with_registered_PDGID_dict,
+                'Particles with PDG-like IDs': Particle_with_PDG_like_ID_dict,
                 'Number of parameters' : number_of_params,
                 'Number of vertices' : number_of_vertices,
                 'Number of coupling orders' : number_of_coupling_orders,
@@ -485,7 +625,7 @@ def is_parent(child, parent):
     return is_parent(child.parents[0], parent)
 
         
-def uploader(model_path,myrepo, myfork, params):
+def uploader(model_path, myrepo, myfork, params):
     
     '''    Generate the metadata for the model   '''
     file, filename, modelname, metadata_name = metadatamaker(model_path, create_file=False)
@@ -495,7 +635,7 @@ def uploader(model_path,myrepo, myfork, params):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -505,7 +645,7 @@ def uploader(model_path,myrepo, myfork, params):
             print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
             os.remove(metadata_name)
             continuecommand = raw_input('Do you want to continue your upload?' + \
-                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+                                    colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
             if continuecommand == 'Yes':
                 while True:
                     metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
@@ -522,7 +662,7 @@ def uploader(model_path,myrepo, myfork, params):
     '''    Check if  Zenodo token works    '''    
     # Create an empty upload
     headers = {"Content-Type": "application/json"}
-    r = requests.post("https://zenodo.org/api/deposit/depositions", 
+    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions", 
                       params= params,
                       json= {},
                       headers= headers)
@@ -566,7 +706,7 @@ def uploader(model_path,myrepo, myfork, params):
     }
 
     # Add required metadata to draft
-    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(deposition_id),
+    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(deposition_id),
                      params=params,
                      data=json.dumps(data),
                      headers=headers)
@@ -597,7 +737,7 @@ def uploader(model_path,myrepo, myfork, params):
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
-            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
+            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(deposition_id),
                               params=params)
             if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
@@ -617,7 +757,7 @@ def uploader_all(all_models):
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
@@ -629,7 +769,7 @@ def uploader_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('Neubauer-Group/UFOMetadata')
+        repo = g.get_repo('ThanosWang/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -665,7 +805,7 @@ def uploader_all(all_models):
     )
 
 
-def updatenewversion(model_path, myrepo, myfork, params, depositions):
+def newversion(model_path, myrepo, myfork, params, depositions):
 
     '''    Check for necessary files and their formats    '''
     original_file = os.listdir(model_path)
@@ -707,7 +847,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -717,7 +857,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
             print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
             os.remove(metadata_name)
             continuecommand = raw_input('Do you want to continue your upload?' + \
-                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+                                    colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
             if continuecommand == 'Yes':
                 while True:
                     metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
@@ -743,7 +883,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
     assert found_entry, colored('The zenodo entry corresponding to DOI: {} not found'.format(file['Existing Model Doi']), 'red')
 
     old_deposition_id = entry['links']['latest'].strip().split('/')[-1]
-    _r = requests.get("https://zenodo.org/api/records/{}".format(old_deposition_id), params=params)
+    _r = requests.get("https://sandbox.zenodo.org/api/records/{}".format(old_deposition_id), params=params)
     for _file in _r.json()['files']:
         link = _file['links']['self'].strip()
         fname = link.split('/')[-1]
@@ -756,7 +896,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
 
     # Work with new version draft
     '''    Request a  new version    '''
-    r = requests.post("https://zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
+    r = requests.post("https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/newversion"%(old_deposition_id),params=params)
     if r.status_code > 400:
         print(colored("Creating deposition entry with Zenodo Failed!", "red"))
         print("Status Code: {}".format(r.status_code))
@@ -766,7 +906,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
     new_deposition_id = r.json()['links']['latest_draft'].split('/')[-1]
     
     if deletelist[0] != 'No':
-        r = requests.get("https://zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
+        r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions/%s/files"%(new_deposition_id), params=params)
         if r.status_code > 400:
             print(colored("Could not fetch file details from latest version!", "red"))
             print("Status Code: {}".format(r.status_code))
@@ -778,7 +918,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
 
     headers = {"Content-Type": "application/json"}
     
-    r = requests.get('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      json={},
                      params=params,
                      headers=headers )
@@ -823,7 +963,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
         }
     }
 
-    r = requests.put('https://zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
+    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' %(new_deposition_id),
                      params=params,
                      data=json.dumps(data),
                      headers=headers)
@@ -857,7 +997,7 @@ def updatenewversion(model_path, myrepo, myfork, params, depositions):
         publish_command = raw_input('Do you want to publish your model and send your new enriched metadata file to GitHub repository UFOMetadata? ' + \
                                     colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
         if publish_command == 'Yes':
-            r = requests.post('https://zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
+            r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' %(new_deposition_id),
                               params=params)
             if r.status_code != 202:
                 print(colored("Publishing model with Zenodo Failed!", "red"))
@@ -876,7 +1016,7 @@ def newversion_all(all_models):
     '''    Check if  Zenodo token works    '''
     Zenodo_Access_Token = getpass('Please enter your Zenodo access token:')
     params = {'access_token': Zenodo_Access_Token}
-    r = requests.get("https://zenodo.org/api/deposit/depositions", params=params)
+    r = requests.get("https://sandbox.zenodo.org/api/deposit/depositions", params=params)
     if r.status_code > 400:
         raise Exception(colored("URL connection with Zenodo Failed!", "red") + " Status Code: " + colored("{}".format(r.status_code), "red"))
     print("Validating Zenodo access token: " + colored("PASSED!", "green"))
@@ -888,7 +1028,7 @@ def newversion_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('Neubauer-Group/UFOMetadata')
+        repo = g.get_repo('ThanosWang/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -910,7 +1050,7 @@ def newversion_all(all_models):
     for _path in all_models:
         print("\nChecking Model: " + colored(_path, "magenta") + "\n")
         os.chdir(_path)
-        updatenewversion(model_path = os.getcwd(), myrepo= repo, myfork = myfork, params = params, depositions = r.json())
+        newversion(model_path = os.getcwd(), myrepo= repo, myfork = myfork, params = params, depositions = r.json())
         os.chdir(base_path)
 
     # Pull Request from forked branch to original
@@ -973,7 +1113,7 @@ def githubupload(model_path, myrepo, myfork):
     Allmetadataname = [i.name for i in Allmetadata]
     while True:
         if metadata_name in Allmetadataname:
-            url = 'https://raw.githubusercontent.com/Neubauer-Group/UFOMetadata/main/Metadata/'
+            url = 'https://raw.githubusercontent.com/ThanosWang/UFOMetadata/main/Metadata/'
             url += metadata_name
             metadata = requests.get(url)
             open(metadata_name,'wb').write(metadata.content)
@@ -983,7 +1123,7 @@ def githubupload(model_path, myrepo, myfork):
             print('Your metadata file name has been used. Please check the model with DOI: ' + colored(DOI, 'red') + ' in Zenodo.')
             os.remove(metadata_name)
             continuecommand = raw_input('Do you want to continue your upload?' + \
-                                        colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
+                                    colored(' Yes', 'green') + ' or' + colored(' No', 'red') + ':')
             if continuecommand == 'Yes':
                 while True:
                     metadata_name = raw_input('Please rename your metadata file:').replace(' ','_')
@@ -1014,7 +1154,7 @@ def githubupload_all(all_models):
         g = Github(Github_Access_Token)
         github_user = g.get_user()
         # Get the public repo
-        repo = g.get_repo('Neubauer-Group/UFOMetadata')
+        repo = g.get_repo('ThanosWang/UFOMetadata')
     except:
         raise Exception(colored("Github access token cannot be validated", "red"))
 
@@ -1049,10 +1189,24 @@ def githubupload_all(all_models):
     If your pull request failed or workflow doesn't start, please contact ''' +  colored('thanoswang@163.com/zijun4@illinois.edu' ,'blue')
     )
 
-
+def UFOUpload(command,modelpath):
+    with open(modelpath) as f:
+        all_models = [line.strip() for line in f.readlines() if not line.strip().startswith('#')]
+    if command == 'Validation check':
+        validator_all(all_models=all_models)
+    elif command == 'Generate metadata':
+        metadatamaker_all(all_models=all_models)
+    elif command == 'Upload model':
+        uploader_all(all_models=all_models)
+    elif command == 'Update new version':
+        newversion_all(all_models=all_models)
+    elif command == 'Upload metadata to GitHub':
+        githubupload_all(all_models=all_models)
+    else:
+        print('Wrong command! Please choose from ["Validation check", "Generate metadata", "Upload model", "Updata new version", "Upload metadata to GitHub"].')
 
 if __name__ == '__main__':
-    FUNCTION_MAP = {'Validation Check' : validator_all,
+    FUNCTION_MAP = {'Validation check' : validator_all,
                     'Generate metadata' : metadatamaker_all,
                     'Upload model': uploader_all,
                     'Update new version' : newversion_all,

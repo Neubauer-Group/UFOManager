@@ -13,6 +13,14 @@ Domain specific interpretation of FAIR principles in the context of different ki
 # About this repository
 Like any other digital content, UFO models have software and platform dependencies, require version controlling, and can benefit from a unified way of preserving and distributing these resources. This FAIR-principle guided repository has been developed as a comprehensive tool to automate the persistent preservation and dispersion of UFO models and their corresponding metadata, creating a reliable and persistent bridgeway between the developers and users of such models. The primary content of this repository is the `UFOManager` package that consists of two python scripts: `UFOUpload.py` for uploading UFO models and `UFODownlaod.py` for downloading UFO modelss. Both scripts can be used as standalone `Python` scripts or the `UFOManager` package can be incorporated into user-developed custom facilitaor script.
 
+# Dependencies
+The functions of the `UFOManager/UFOUpload.py` script i.e. to validate UFO models, generate their metadata, and upload them to zenodo with DOIs are supported with both Python 2 and 3. Meanwhile, `UFOManager/UFODownload.py` is only supported with Python 3. The dependencies to successfully use this package are listed in the files `requirements_Python2.txt` and `requirements_Python3.txt`. The specific instructions to setup the necessary environments and install these dependencies are given in the following section.
+
+The following list includes some of the dependencies-
+- [Particle](https://github.com/scikit-hep/particle/) to validate particle [PDG IDs](https://pdg.lbl.gov/2020/reviews/rpp2020-rev-monte-carlo-numbering.pdf)
+- [PyGithub](https://github.com/PyGithub/PyGithub) to access the Github REST API
+- [Requests](https://pypi.org/project/requests/) to send HTTP requests for accessing and validating web addresses
+- [zenodo_get](https://github.com/dvolgyes/zenodo_get) to download files from Zenodo records (only used in Python 3 environment)
 
 # Setup
 This package can be setup by simply downloading it from the git repository and installing the necessary dependencies. To download this package:
